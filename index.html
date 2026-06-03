@@ -37,7 +37,7 @@
   @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-7vw,8vh) scale(.95)}}
   @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5vw,-7vh) scale(1.2)}}
   #grain{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  #globe{position:fixed;inset:0;z-index:-2;transition:opacity .4s ease}
+  #globe{position:fixed;inset:0;z-index:-2}
   #globe canvas{display:block}
 
   .glass{background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
@@ -73,15 +73,16 @@
   .lead{max-width:60ch;margin-top:22px;color:var(--ink-soft);font-size:clamp(1rem,1.4vw,1.16rem)}
 
   #hero{position:relative;z-index:2;text-align:center;flex-direction:column;justify-content:center;overflow:hidden}
+  #hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(68% 58% at 50% 47%,rgba(4,7,10,.72),rgba(4,7,10,.34) 50%,transparent 74%)}
   .hero__bg-fallback{position:absolute;inset:0;opacity:0;z-index:-1;background:radial-gradient(60% 60% at 50% 40%,rgba(51,201,143,.25),transparent 70%),var(--bg)}
-  .hero__inner{padding:0 20px;opacity:0;transform:translateY(20px);animation:heroIn 1.4s cubic-bezier(.2,.7,.2,1) 3.4s forwards}
+  .hero__inner{position:relative;z-index:2;padding:0 20px;opacity:0;transform:translateY(20px);animation:heroIn 1.4s cubic-bezier(.2,.7,.2,1) 3.4s forwards}
   @keyframes heroIn{to{opacity:1;transform:none}}
-  .kicker{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--aurora);margin-bottom:26px}
+  .kicker{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--aurora);margin-bottom:26px;text-shadow:0 1px 12px rgba(0,0,0,.8)}
   .kicker::before,.kicker::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--aurora))}
   .kicker::after{background:linear-gradient(90deg,var(--aurora),transparent)}
-  #hero h1{font-family:'Fraunces',serif;font-weight:900;line-height:.9;font-size:clamp(3.2rem,13vw,9rem);letter-spacing:-.03em;text-shadow:0 4px 60px rgba(0,0,0,.55)}
+  #hero h1{font-family:'Fraunces',serif;font-weight:900;line-height:.9;font-size:clamp(3.2rem,13vw,9rem);letter-spacing:-.03em;text-shadow:0 2px 10px rgba(0,0,0,.7),0 10px 60px rgba(0,0,0,.75)}
   #hero h1 em{font-style:italic;font-weight:500;color:var(--ice)}
-  .hero__sub{max-width:540px;margin:24px auto 0;font-size:clamp(1rem,1.6vw,1.2rem);color:var(--ink-soft)}
+  .hero__sub{max-width:540px;margin:24px auto 0;font-size:clamp(1rem,1.6vw,1.2rem);color:#d3dce3;text-shadow:0 1px 14px rgba(0,0,0,.8)}
   .hero__pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:32px}
   .pill{font-family:'Space Mono',monospace;font-size:.72rem;padding:9px 16px;border-radius:100px;background:rgba(255,255,255,.06);backdrop-filter:blur(14px);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
   .pill b{color:var(--aurora)}
@@ -861,10 +862,11 @@ document.querySelectorAll('[data-day]').forEach(el=>{
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeDay));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
 
-/* ===== 3D Earth globe ===== */
+/* ===== 3D Earth: scroll-driven satellite tour ===== */
 (function(){
   const mount=document.getElementById('globe');
-  const label=document.getElementById('marker-label');
+  const labelWrap=document.getElementById('marker-label');
+  const labelEl=labelWrap?labelWrap.querySelector('.ml'):null;
   if(!window.THREE){document.body.classList.add('no-globe');return;}
   let renderer;
   try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});}
@@ -877,97 +879,148 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   mount.appendChild(renderer.domElement);
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(42,W/H,0.1,3000);
-  camera.position.set(0,0,430);
+  const camera=new THREE.PerspectiveCamera(40,W/H,0.1,4000);
+  camera.position.set(0,16,460);camera.lookAt(0,0,0);
 
-  const spinner=new THREE.Group();
-  const globe=new THREE.Group();
-  spinner.add(globe);scene.add(spinner);
+  const globe=new THREE.Group();scene.add(globe);
   const R=100, SEG=mobile?48:64;
 
-  // base sphere (dark until texture arrives)
-  const mat=new THREE.MeshPhongMaterial({color:0x0a141d,emissive:0x05161d,emissiveIntensity:.4,shininess:12});
-  const core=new THREE.Mesh(new THREE.SphereGeometry(R,SEG,SEG),mat);
-  globe.add(core);
+  const mat=new THREE.MeshPhongMaterial({color:0x0a141d,emissive:0x06161f,emissiveIntensity:.4,shininess:14});
+  globe.add(new THREE.Mesh(new THREE.SphereGeometry(R,SEG,SEG),mat));
 
-  // graticule (subtle, also the fallback look)
+  // graticule (also the fallback look)
   const gmat=new THREE.LineBasicMaterial({color:0x79ecae,transparent:true,opacity:.10,blending:THREE.AdditiveBlending,depthWrite:false});
-  for(let k=-4;k<=4;k++){const lat=k*18*Math.PI/180,rr=Math.cos(lat)*R*1.003,yy=Math.sin(lat)*R*1.003,pts=[];
-    for(let i=0;i<=120;i++){const a=i/120*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*rr,yy,Math.sin(a)*rr));}
-    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gmat));}
-  for(let m=0;m<12;m++){const lon=m/12*Math.PI*2,pts=[];
-    for(let i=0;i<=120;i++){const lat=-Math.PI/2+i/120*Math.PI;
-      pts.push(new THREE.Vector3(Math.cos(lat)*Math.cos(lon)*R*1.003,Math.sin(lat)*R*1.003,Math.cos(lat)*Math.sin(lon)*R*1.003));}
-    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gmat));}
+  for(let k=-4;k<=4;k++){const la=k*18*Math.PI/180,rr=Math.cos(la)*R*1.003,yy=Math.sin(la)*R*1.003,p=[];
+    for(let i=0;i<=120;i++){const a=i/120*Math.PI*2;p.push(new THREE.Vector3(Math.cos(a)*rr,yy,Math.sin(a)*rr));}
+    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(p),gmat));}
+  for(let m=0;m<12;m++){const lo=m/12*Math.PI*2,p=[];
+    for(let i=0;i<=120;i++){const la=-Math.PI/2+i/120*Math.PI;
+      p.push(new THREE.Vector3(Math.cos(la)*Math.cos(lo)*R*1.003,Math.sin(la)*R*1.003,Math.cos(la)*Math.sin(lo)*R*1.003));}
+    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(p),gmat));}
 
-  // try to load real NASA Blue Marble satellite texture
+  // real NASA Blue Marble satellite texture (with graceful fallback)
   const loader=new THREE.TextureLoader();loader.crossOrigin='anonymous';
   loader.load('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg',
-    tex=>{tex.colorSpace=THREE.SRGBColorSpace||undefined;mat.map=tex;mat.color.set(0xffffff);mat.emissive.set(0x0a1a2a);mat.emissiveIntensity=.18;mat.needsUpdate=true;
-      gmat.opacity=.05;
+    tex=>{if('colorSpace'in tex)tex.colorSpace=THREE.SRGBColorSpace;mat.map=tex;mat.color.set(0xffffff);mat.emissive.set(0x0a1a2a);mat.emissiveIntensity=.16;mat.needsUpdate=true;gmat.opacity=.05;
       loader.load('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png',
-        b=>{mat.bumpMap=b;mat.bumpScale=1.2;mat.needsUpdate=true;},undefined,()=>{});},
-    undefined,
-    ()=>{/* texture failed → keep stylized graticule globe */ gmat.opacity=.18;});
+        b=>{mat.bumpMap=b;mat.bumpScale=1.3;mat.needsUpdate=true;},undefined,()=>{});},
+    undefined,()=>{gmat.opacity=.18;});
 
-  // atmosphere fresnel rim
+  // atmosphere
   const atmo=new THREE.Mesh(new THREE.SphereGeometry(R*1.16,SEG,SEG),
     new THREE.ShaderMaterial({transparent:true,blending:THREE.AdditiveBlending,side:THREE.BackSide,depthWrite:false,
-      uniforms:{uColor:{value:new THREE.Color(0x53c8e6)},uIntensity:{value:0.0}},
+      uniforms:{uColor:{value:new THREE.Color(0x53c8e6)},uI:{value:0.0}},
       vertexShader:'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-      fragmentShader:'varying vec3 vN;uniform vec3 uColor;uniform float uIntensity;void main(){float i=pow(0.72-dot(vN,vec3(0.0,0.0,1.0)),3.0);gl_FragColor=vec4(uColor,1.0)*i*uIntensity;}'}));
+      fragmentShader:'varying vec3 vN;uniform vec3 uColor;uniform float uI;void main(){float i=pow(0.72-dot(vN,vec3(0.0,0.0,1.0)),3.0);gl_FragColor=vec4(uColor,1.0)*i*uI;}'}));
   scene.add(atmo);
 
-  // Norway marker (standard equirectangular mapping)
-  const lat=61, lon=9, phi=(90-lat)*Math.PI/180, theta=(lon+180)*Math.PI/180;
-  const mDir=new THREE.Vector3(-Math.sin(phi)*Math.cos(theta),Math.cos(phi),Math.sin(phi)*Math.sin(theta)).normalize();
-  globe.quaternion.setFromUnitVectors(mDir,new THREE.Vector3(0,0,1)); // bring Norway (and painted continent) to face camera
-  const mPos=mDir.clone().multiplyScalar(R*1.01);
-  const mg=new THREE.Group();mg.position.copy(mPos);mg.lookAt(mPos.clone().multiplyScalar(2));
-  mg.add(new THREE.Mesh(new THREE.SphereGeometry(1.6,16,16),new THREE.MeshBasicMaterial({color:0x9affc9})));
-  const pulse=new THREE.Mesh(new THREE.RingGeometry(2.3,2.9,40),new THREE.MeshBasicMaterial({color:0x79ecae,transparent:true,opacity:.8,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
-  mg.add(pulse);globe.add(mg);
-
   // stars
-  const sN=mobile?900:1400,sp=new Float32Array(sN*3);
-  for(let i=0;i<sN;i++){const r=700+Math.random()*900,t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1);
+  const sN=mobile?800:1300,sp=new Float32Array(sN*3);
+  for(let i=0;i<sN;i++){const r=800+Math.random()*1000,t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1);
     sp[i*3]=r*Math.sin(p)*Math.cos(t);sp[i*3+1]=r*Math.sin(p)*Math.sin(t);sp[i*3+2]=r*Math.cos(p);}
   const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THREE.BufferAttribute(sp,3));
-  const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xcfe8ff,size:1.7,transparent:true,opacity:.75,sizeAttenuation:true}));
+  const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xcfe8ff,size:1.7,transparent:true,opacity:.7,sizeAttenuation:true}));
   scene.add(stars);
 
-  scene.add(new THREE.AmbientLight(0x8095aa,0.95));
-  const sun=new THREE.DirectionalLight(0xffffff,1.05);sun.position.set(-1,0.35,1.1);scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x8398ac,1.0));
+  const sun=new THREE.DirectionalLight(0xffffff,1.05);sun.position.set(-1,0.4,1.1);scene.add(sun);
 
-  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-  const DUR=3700,SPIN0=6*Math.PI,ZFAR=440,ZNEAR=mobile?235:200;
-  const start=performance.now();
-  let done=false,paused=false;const v2=new THREE.Vector3();
+  // satellite reticle (locks onto the point facing the camera)
+  const mk=new THREE.Group();
+  mk.add(new THREE.Mesh(new THREE.SphereGeometry(1.5,16,16),new THREE.MeshBasicMaterial({color:0x9affc9})));
+  const ring=new THREE.Mesh(new THREE.RingGeometry(2.4,3.0,42),new THREE.MeshBasicMaterial({color:0x79ecae,transparent:true,opacity:.85,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  mk.add(ring);globe.add(mk);
 
-  function projectLabel(){mg.getWorldPosition(v2);v2.project(camera);
-    label.style.left=((v2.x*0.5+0.5)*W)+'px';label.style.top=((-v2.y*0.5+0.5)*H)+'px';}
+  // map lat/lon to a direction on the textured sphere
+  function dirOf(lat,lon){const phi=(90-lat)*Math.PI/180,th=(lon+180)*Math.PI/180;
+    return new THREE.Vector3(-Math.sin(phi)*Math.cos(th),Math.cos(phi),Math.sin(phi)*Math.sin(th)).normalize();}
+  const FRONT=new THREE.Vector3(0,0,1);
+  // one waypoint per day card (days 1-3 = Oslo)
+  const WP=[
+    ['Oslo',59.913,10.752],['Oslo',59.913,10.752],['Oslo',59.913,10.752],
+    ['Gjende',61.495,8.793],['Besseggen',61.521,8.715],['Spiterstulen',61.628,8.404],
+    ['Galdhøpiggen',61.636,8.313],['Åndalsnes',62.567,7.687],['Romsdalseggen',62.546,7.776],
+    ['Trollstigen',62.456,7.671]
+  ].map(w=>{const d=dirOf(w[1],w[2]);return {name:w[0],dir:d,q:new THREE.Quaternion().setFromUnitVectors(d,FRONT)};});
+
+  const cards=Array.from(document.querySelectorAll('#plan [data-day]'));
+  const planSec=document.getElementById('plan');
+  const prog=document.getElementById('progress');
+
+  const restZ=255,zNear=mobile?185:172,zFar=305,introZ=460,SPIN=Math.PI*6,DUR=3400;
+  const start=performance.now();let introDone=false,paused=false;
+  const introSpin=new THREE.Quaternion(),YAXIS=new THREE.Vector3(0,1,0);
+  const targetQ=WP[0].q.clone(),tmpQ=new THREE.Quaternion(),faced=new THREE.Vector3(),wpos=new THREE.Vector3();
+  globe.quaternion.copy(WP[0].q);
+  let opacity=1,labelName='Oslo',lock=1;
+  const smooth=x=>x*x*(3-2*x);
+
+  function tourPos(){
+    const vc=H*0.5;let lo=-1;
+    for(let i=0;i<cards.length;i++){const r=cards[i].getBoundingClientRect();if(r.top+r.height*0.5<=vc)lo=i;}
+    if(lo<0)return {i0:0,frac:0};
+    if(lo>=cards.length-1)return {i0:cards.length-1,frac:0};
+    const rA=cards[lo].getBoundingClientRect(),rB=cards[lo+1].getBoundingClientRect();
+    const cA=rA.top+rA.height*0.5,cB=rB.top+rB.height*0.5;
+    return {i0:lo,frac:Math.min(Math.max((vc-cA)/(cB-cA||1),0),1)};
+  }
+  function updateOpacity(){
+    if(!planSec)return;const pr=planSec.getBoundingClientRect();
+    const enter=Math.min(Math.max((H-pr.top)/H,0),1);
+    let base=1-0.42*enter;                      // dim a bit during the plan so cards stay legible
+    let fade=pr.bottom<H?Math.min(Math.max(pr.bottom/H,0),1):1; // fade out after the plan ends
+    opacity=base*fade;mount.style.opacity=opacity.toFixed(3);
+  }
 
   function frame(now){
     requestAnimationFrame(frame);if(paused)return;
-    const tr=Math.min((now-start)/DUR,1),t=ease(tr);
-    if(tr<1){spinner.rotation.y=SPIN0*(1-t);camera.position.z=ZFAR+(ZNEAR-ZFAR)*t;atmo.material.uniforms.uIntensity.value=t*1.2;}
-    else{if(!done){done=true;label.style.opacity='1';}spinner.rotation.y-=0.0009;}
-    pulse.rotation.z+=0.01;const ps=1+Math.sin(now*0.004)*0.35;pulse.scale.set(ps,ps,ps);pulse.material.opacity=0.7-(ps-0.65)*0.5;
-    stars.rotation.y+=0.0003;
-    renderer.render(scene,camera);projectLabel();
+    if(!introDone){
+      const tr=Math.min((now-start)/DUR,1),e=smooth(tr);
+      introSpin.setFromAxisAngle(YAXIS,SPIN*(1-e));
+      globe.quaternion.copy(WP[0].q).multiply(introSpin);
+      camera.position.z=introZ+(restZ-introZ)*e;
+      atmo.material.uniforms.uI.value=e*1.25;
+      if(tr>=1)introDone=true;
+    }else{
+      const tp=tourPos();
+      const pr=planSec?planSec.getBoundingClientRect():{top:H};
+      const enter=Math.min(Math.max((H-pr.top)/H,0),1);
+      tmpQ.copy(WP[tp.i0].q).slerp(WP[Math.min(tp.i0+1,WP.length-1)].q,smooth(tp.frac));
+      targetQ.copy(tmpQ);
+      const dip=Math.sin(Math.PI*tp.frac);          // 0 on a location, 1 mid-flight
+      const tourZ=zNear+(zFar-zNear)*dip;            // zoom out between, zoom in on arrival
+      const targetZ=restZ+(tourZ-restZ)*enter;       // blend with the calm hero distance
+      lock=1-dip;labelName=WP[Math.round(tp.i0+tp.frac)].name;
+      globe.quaternion.slerp(targetQ,0.11);          // buttery glide
+      camera.position.z+=(targetZ-camera.position.z)*0.10;
+    }
+    camera.lookAt(0,0,0);
+    // keep the reticle on the point currently facing the camera
+    faced.copy(FRONT).applyQuaternion(globe.quaternion.clone().invert());
+    mk.position.copy(faced.multiplyScalar(R*1.012));
+    mk.lookAt(mk.position.clone().multiplyScalar(2));
+    ring.rotation.z+=0.012;const ps=1+Math.sin(now*0.004)*0.3;ring.scale.set(ps,ps,ps);
+    const showLock=introDone?lock:1;
+    mk.visible=opacity>0.05&&showLock>0.15;ring.material.opacity=0.85*showLock;
+    if(labelWrap)labelWrap.style.opacity=(opacity>0.25&&showLock>0.45)?'1':'0';
+    if(labelEl)labelEl.innerHTML='<b>'+labelName.toUpperCase()+'</b> · target lock';
+    stars.rotation.y+=0.0002;
+    renderer.render(scene,camera);
+    if(labelWrap){mk.getWorldPosition(wpos);wpos.project(camera);
+      labelWrap.style.left=((wpos.x*0.5+0.5)*W)+'px';labelWrap.style.top=((-wpos.y*0.5+0.5)*H)+'px';}
   }
   requestAnimationFrame(frame);
 
   window.addEventListener('scroll',()=>{
     const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
-    prog.style.width=(h.scrollTop/max*100)+'%';
-    const y=window.scrollY,vh=window.innerHeight,op=Math.max(0,1-y/(vh*0.85));
-    mount.style.opacity=op;label.style.opacity=(done&&op>0.6)?'1':'0';
-    const hide=y>vh*1.05;
-    if(hide&&!paused)paused=true;else if(!hide&&paused){paused=false;requestAnimationFrame(frame);}
+    if(prog)prog.style.width=(h.scrollTop/(max||1)*100)+'%';
+    updateOpacity();
+    const wasPaused=paused;paused=opacity<=0.02;
+    if(wasPaused&&!paused)requestAnimationFrame(frame);
   },{passive:true});
+  updateOpacity();
 
-  window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);});
+  window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);updateOpacity();});
 })();
 </script>
 </body>
