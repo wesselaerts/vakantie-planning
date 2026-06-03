@@ -17,10 +17,15 @@
     --amber:#ffbd7a; --amber-deep:#ff9a55; --magenta:#ef86bb;
     --glass-line:rgba(255,255,255,.14);
     --maxw:1180px;
+    /* one motion system, used everywhere */
+    --ease-out:cubic-bezier(0.16,1,0.3,1);     /* landen / binnenkomen */
+    --ease-in-out:cubic-bezier(0.4,0,0.2,1);   /* neutrale beweging */
+    --ease-back:cubic-bezier(0.34,1.56,0.64,1);/* één signatuur-overshoot */
+    --dur-micro:170ms; --dur-base:320ms; --dur-slow:540ms;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth;scroll-snap-type:y proximity}
-  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-optical-sizing:auto}
   body.locked{overflow:hidden}
   body.no-globe #globe{display:none}
   body.no-globe .hero__bg-fallback{opacity:1}
@@ -30,6 +35,21 @@
   .disp{font-family:'Fraunces',serif}
   .mono{font-family:'Space Mono',monospace;letter-spacing:.03em}
 
+  /* visible, calm focus ring — accessibility as craft */
+  :focus{outline:none}
+  a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--aurora);outline-offset:3px;border-radius:8px}
+  .day:focus-visible{outline:2px solid var(--aurora);outline-offset:6px;border-radius:26px}
+
+  /* graceful image loading: shimmer → fade in; clean fallback on error */
+  img.img-load{opacity:0;transition:opacity var(--dur-slow) var(--ease-out);background:linear-gradient(100deg,#0e1721 28%,#172534 50%,#0e1721 72%);background-size:220% 100%;animation:shimmer 1.5s linear infinite}
+  img.img-ready{opacity:1;animation:none;background:none}
+  img.img-error{opacity:1;animation:none;background:linear-gradient(135deg,#0d151e,#0a1019)}
+  @keyframes shimmer{to{background-position:-220% 0}}
+
+  /* tactile press feedback */
+  .day,.backbtn,.nav-links a,.open-day{transition:transform var(--dur-micro) var(--ease-out)}
+  .backbtn:active,.nav-links a:active{transform:scale(.96)}
+
   #bg-aurora{position:fixed;inset:0;z-index:-3;overflow:hidden;background:radial-gradient(120% 90% at 50% -10%,#0a1018 0%,#05080b 55%,#04060a 100%)}
   #bg-aurora i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;mix-blend-mode:screen}
   .blob1{width:60vw;height:60vw;left:-15vw;top:-10vh;background:radial-gradient(circle,rgba(51,201,143,.55),transparent 65%);animation:drift1 26s ease-in-out infinite}
@@ -38,6 +58,8 @@
   @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8vw,6vh) scale(1.15)}}
   @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-7vw,8vh) scale(.95)}}
   @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5vw,-7vh) scale(1.2)}}
+  body.flare #bg-aurora i{opacity:.92;transition:opacity 1.3s var(--ease-out)}
+  .brand .dot{cursor:pointer}
   #grain{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   #globe{position:fixed;inset:0;z-index:-2}
   #flymap{position:fixed;inset:0;z-index:-2;opacity:0;pointer-events:none;background:#05080b;filter:saturate(1.08) contrast(1.04) brightness(.9)}
@@ -46,12 +68,32 @@
   #flyname{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;padding:8px 15px;border-radius:100px;white-space:nowrap;background:rgba(5,8,11,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-line);color:var(--ice);opacity:0;transition:opacity .5s ease;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
   #flyname b{color:var(--aurora)}
   #globe canvas{display:block}
+  #map-vignette{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity var(--dur-base) var(--ease-out);background:radial-gradient(105% 95% at 50% 46%,transparent 38%,rgba(5,8,11,.18) 66%,rgba(5,8,11,.6) 100%)}
 
-  .glass{background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
-    backdrop-filter:blur(22px) saturate(165%);-webkit-backdrop-filter:blur(22px) saturate(165%);
-    border:1px solid var(--glass-line);box-shadow:0 10px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04);
+  /* ---- preloader: the first three seconds ---- */
+  #preloader{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 90% at 50% 38%,#0a131c,#05080b 72%);transition:opacity .9s var(--ease-out),visibility .9s}
+  #preloader.done{opacity:0;visibility:hidden}
+  .pl-inner{display:flex;flex-direction:column;align-items:center;gap:13px;transition:transform .9s var(--ease-out)}
+  #preloader.done .pl-inner{transform:translateY(-14px)}
+  .pl-ring{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.12);border-top-color:var(--aurora);
+    animation:plspin .9s linear infinite;box-shadow:0 0 26px rgba(121,236,174,.25)}
+  @keyframes plspin{to{transform:rotate(360deg)}}
+  .pl-co{font-size:.6rem;letter-spacing:.24em;color:var(--ice);opacity:.72;margin-top:8px}
+  .pl-title{font-size:clamp(1.9rem,6vw,2.7rem);font-weight:900;letter-spacing:-.01em;color:var(--ink)}
+  .pl-sub{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim)}
+  .pl-dots::after{content:"";animation:pldots 1.5s steps(1,end) infinite}
+  @keyframes pldots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}}
+
+  .glass{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.035));
+    backdrop-filter:blur(16px) saturate(175%);-webkit-backdrop-filter:blur(16px) saturate(175%);
+    border:1px solid var(--glass-line);box-shadow:0 12px 42px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.26),inset 0 -1px 0 rgba(255,255,255,.05);
     border-radius:24px;position:relative;overflow:hidden}
-  .glass::before{content:"";position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent);pointer-events:none}
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 42%)}
+  .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(120% 80% at 8% -10%,rgba(255,255,255,.16),transparent 38%)}
+  .glass>*{position:relative;z-index:1}
 
   nav{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:900;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;border-radius:100px;
     background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
@@ -59,7 +101,7 @@
   .brand{font-family:'Fraunces',serif;font-weight:900;font-size:.95rem;display:flex;align-items:center;gap:8px;padding-right:10px}
   .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--aurora);box-shadow:0 0 12px var(--aurora)}
   .nav-links{display:flex;gap:4px}
-  .nav-links a{font-size:.74rem;color:var(--ink-soft);font-weight:600;padding:8px 13px;border-radius:100px;transition:background .2s,color .2s}
+  .nav-links a{font-size:.74rem;color:var(--ink-soft);font-weight:600;padding:8px 13px;border-radius:100px;transition:background var(--dur-micro) var(--ease-out),color var(--dur-micro) var(--ease-out)}
   .nav-links a:hover{color:var(--ink);background:rgba(255,255,255,.10)}
   .nav-toggle{display:none;background:rgba(255,255,255,.08);border:1px solid var(--glass-line);color:var(--ink);border-radius:100px;width:40px;height:40px;font-size:1.1rem;cursor:pointer}
   #progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--aurora),var(--ice));z-index:1000}
@@ -70,6 +112,7 @@
     .nav-toggle{display:flex;align-items:center;justify-content:center}
   }
 
+  .slide,.flow{scroll-margin-top:88px}
   .slide{min-height:100svh;display:flex;align-items:center;scroll-snap-align:start;position:relative}
   .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:120px clamp(18px,4vw,48px)}
   .flow{padding:clamp(56px,9vh,110px) clamp(18px,4vw,48px)}
@@ -93,9 +136,7 @@
   .hero__pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:32px}
   .pill{font-family:'Space Mono',monospace;font-size:.72rem;padding:9px 16px;border-radius:100px;background:rgba(255,255,255,.06);backdrop-filter:blur(14px);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
   .pill b{color:var(--aurora)}
-  #marker-label{position:fixed;z-index:1;transform:translate(-50%,-170%);pointer-events:none;opacity:0;transition:opacity .6s ease}
-  #marker-label .ml{font-family:'Space Mono',monospace;font-size:.64rem;letter-spacing:.1em;padding:6px 11px;border-radius:100px;white-space:nowrap;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid var(--glass-line);color:var(--ice)}
-  #marker-label .ml b{color:var(--aurora)}
+  #marker-label{display:none}
   .scrollcue{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim);opacity:0;animation:heroIn 1.2s ease 4.2s forwards;text-align:center}
   .scrollcue span{display:block;width:1px;height:44px;margin:12px auto 0;background:linear-gradient(var(--aurora),transparent);animation:cue 1.8s ease-in-out infinite}
   @keyframes cue{0%,100%{transform:scaleY(.4);opacity:.4;transform-origin:top}50%{transform:scaleY(1);opacity:1;transform-origin:top}}
@@ -141,13 +182,14 @@
   .day__num b{font-size:1.05rem;line-height:1.1}
   .day.night .day__num{border-color:var(--amber);box-shadow:0 0 20px rgba(255,189,122,.3)}
   .day.night .day__num b{color:var(--amber)}
-  .day__card{display:block;max-width:430px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
+  .day__card{display:block;max-width:430px;transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
   @media(max-width:760px){.day__card{max-width:none}}
-  .day:hover .day__card{transform:translateY(-3px);box-shadow:0 18px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.22)}
+  .day:hover .day__card,.day:focus-visible .day__card{transform:translateY(-4px);box-shadow:0 22px 56px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.24)}
+  .day:active .day__card{transform:translateY(-1px) scale(.992)}
   .day__media{position:relative;height:128px;overflow:hidden}
   @media(max-width:760px){.day__media{height:118px}}
-  .day__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
-  .day:hover .day__media img{transform:scale(1.05)}
+  .day__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform var(--dur-slow) var(--ease-out)}
+  .day:hover .day__media img{transform:scale(1.06)}
   .day__media .geo{position:absolute;left:12px;bottom:11px;font-family:'Space Mono',monospace;font-size:.58rem;background:rgba(5,8,11,.6);backdrop-filter:blur(6px);padding:5px 10px;border-radius:100px;border:1px solid var(--glass-line)}
   .day__body{padding:20px 22px;display:flex;flex-direction:column}
   .day__route{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.06em;color:var(--aurora);text-transform:uppercase;margin-bottom:8px}
@@ -164,6 +206,10 @@
   .open-day{margin-left:auto;font-family:'Space Mono',monospace;font-size:.64rem;color:var(--ice);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
   .open-day::after{content:"→";transition:transform .3s}
   .day:hover .open-day::after{transform:translateX(4px)}
+  .leg{height:46vh;min-height:280px;display:flex;align-items:center;justify-content:center;position:relative}
+  @media(max-width:760px){.leg{height:42vh;min-height:240px}}
+  .leg span{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8d99a3;background:rgba(5,8,11,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:9px 17px;border-radius:100px;border:1px solid var(--glass-line);text-shadow:0 1px 8px rgba(0,0,0,.85);display:inline-flex;align-items:center;gap:9px}
+  .leg span::before{content:"↓";color:var(--aurora)}
 
   .mapslide{position:relative;overflow:hidden}
   .mapslide .mapframe{position:absolute;inset:0;z-index:-1}
@@ -212,19 +258,27 @@
   .clist .b{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--aurora);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;color:var(--aurora);font-size:.7rem}
   .clist b{color:var(--ink)}
 
-  footer{text-align:center;padding:56px clamp(18px,4vw,48px) calc(56px + env(safe-area-inset-bottom));color:var(--ink-dim);font-size:.82rem;border-top:1px solid var(--glass-line)}
-  footer .disp{font-size:1.5rem;color:var(--ink);display:block;margin-bottom:10px}
+  footer{text-align:center;padding:clamp(64px,12vh,120px) clamp(18px,4vw,48px) calc(64px + env(safe-area-inset-bottom));color:var(--ink-dim);font-size:.82rem;border-top:1px solid var(--glass-line)}
+  footer .disp{font-size:clamp(1.9rem,5vw,3rem);font-weight:900;line-height:1.04;color:var(--ink);display:block;margin-bottom:20px;letter-spacing:-.01em}
+  .foot-line{max-width:48ch;margin:0 auto;color:var(--ink-soft);font-size:1rem;line-height:1.6}
+  .foot-meta{margin-top:26px;font-size:.66rem;letter-spacing:.08em;color:var(--ink-dim)}
   .note{font-size:.77rem;color:var(--ink-dim);max-width:82ch;margin:26px auto 0;line-height:1.7}
 
-  .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out);will-change:opacity,transform}
   .reveal.in{opacity:1;transform:none}
   .reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}
 
   /* ===== DAY DETAIL OVERLAY ===== */
   #detailLayer{position:fixed;inset:0;z-index:1200;overflow-y:auto;-webkit-overflow-scrolling:touch;
     background:linear-gradient(160deg,rgba(8,12,16,.86),rgba(4,6,9,.92));backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
-    transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.7,.2,1);visibility:hidden}
+    transform:translateY(100%);transition:transform var(--dur-slow) var(--ease-out);visibility:hidden}
   #detailLayer.open{transform:translateY(0);visibility:visible}
+  @keyframes detailIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  #detailLayer.open .detail.active .detail-hero{animation:detailIn var(--dur-slow) var(--ease-out) both}
+  #detailLayer.open .detail.active .detail-lead{animation:detailIn var(--dur-slow) var(--ease-out) .06s both}
+  #detailLayer.open .detail.active .opt-h{animation:detailIn var(--dur-slow) var(--ease-out) .1s both}
+  #detailLayer.open .detail.active .opt-grid{animation:detailIn var(--dur-slow) var(--ease-out) .15s both}
+  #detailLayer.open .detail.active .tips,#detailLayer.open .detail.active .dgallery{animation:detailIn var(--dur-slow) var(--ease-out) .22s both}
   .detail{display:none;max-width:920px;margin:0 auto;padding:0 clamp(14px,3vw,28px) 70px}
   .detail.active{display:block}
   .detailbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 18px;padding:10px 10px 10px 14px;border-radius:100px}
@@ -246,7 +300,7 @@
   @media(max-width:680px){.opt-grid{grid-template-columns:1fr}}
   .opt{display:flex;flex-direction:column}
   .opt__img{height:170px;overflow:hidden}
-  .opt__img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+  .opt__img img{width:100%;height:100%;object-fit:cover;transition:transform var(--dur-slow) var(--ease-out)}
   .opt:hover .opt__img img{transform:scale(1.05)}
   .opt__b{padding:20px 22px}
   .opt__tag{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ice);margin-bottom:8px}
@@ -267,14 +321,32 @@
   @media(max-width:680px){.dgallery{grid-template-columns:repeat(2,1fr)}}
   .dgallery img{width:100%;height:120px;object-fit:cover;border-radius:12px;border:1px solid var(--glass-line)}
 
-  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.hero__inner,.scrollcue{animation:none;opacity:1}}
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+    .reveal{opacity:1!important;transform:none!important}
+    .hero__inner,.scrollcue{animation:none;opacity:1}
+    .blob1,.blob2,.blob3{animation:none}
+    img.img-load{animation:none}
+    .showcase__img img{transform:none!important}
+  }
 </style>
 </head>
 <body>
 
+<div id="preloader" aria-hidden="true">
+  <div class="pl-inner">
+    <div class="pl-ring"><span class="pl-fill"></span></div>
+    <div class="pl-co mono">61.6° N · 8.3° E</div>
+    <div class="pl-title disp">Noorwegen</div>
+    <div class="pl-sub mono">scherpstellen<span class="pl-dots"></span></div>
+  </div>
+</div>
+
 <div id="bg-aurora"><i class="blob1"></i><i class="blob2"></i><i class="blob3"></i></div>
 <div id="globe"></div>
 <div id="flymap"></div>
+<div id="map-vignette"></div>
 <div id="flyname"></div>
 <div id="grain"></div>
 <div id="progress"></div>
@@ -297,9 +369,9 @@
 <section class="slide" id="hero">
   <div class="hero__bg-fallback"></div>
   <div class="hero__inner">
-    <span class="kicker">Reisplan · Juli 2026 · 4 vrienden</span>
+    <span class="kicker">Juli 2026 · vier vrienden · één zomer</span>
     <h1>NOORWEGEN<br><em>in tien dagen</em></h1>
-    <p class="hero__sub">Drie nachten los in de stad. Zeven dagen de hoogste bergen van Scandinavië in — met overnachtingen boven op de rug.</p>
+    <p class="hero__sub">Drie nachten waarin de stad nooit helemaal donker wordt. Zeven dagen omhoog — tot waar de lucht dun wordt en het uitzicht je even stil maakt.</p>
     <div class="hero__pills">
       <span class="pill"><b>3</b> dagen stad</span>
       <span class="pill"><b>7</b> dagen bergen</span>
@@ -411,6 +483,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="4" aria-hidden="true"><span>Oslo → Gjende · 5 u bus</span></div>
       <!-- DAG 4 -->
       <div class="day reveal" data-day="4">
         <div class="day__num glass"><small>DAG</small><b>04</b></div>
@@ -424,6 +497,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="5" aria-hidden="true"><span>Gjende → Besseggen-rug</span></div>
       <!-- DAG 5 -->
       <div class="day reveal" data-day="5">
         <div class="day__num glass"><small>DAG</small><b>05</b></div>
@@ -437,6 +511,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="6" aria-hidden="true"><span>Gjende → Spiterstulen</span></div>
       <!-- DAG 6 -->
       <div class="day reveal" data-day="6">
         <div class="day__num glass"><small>DAG</small><b>06</b></div>
@@ -450,6 +525,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="7" aria-hidden="true"><span>Spiterstulen → Galdhøpiggen</span></div>
       <!-- DAG 7 -->
       <div class="day reveal" data-day="7">
         <div class="day__num glass"><small>DAG</small><b>07</b></div>
@@ -463,6 +539,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="8" aria-hidden="true"><span>Jotunheimen → Åndalsnes</span></div>
       <!-- DAG 8 -->
       <div class="day reveal" data-day="8">
         <div class="day__num glass"><small>DAG</small><b>08</b></div>
@@ -476,6 +553,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="9" aria-hidden="true"><span>Åndalsnes → Romsdalseggen</span></div>
       <!-- DAG 9 -->
       <div class="day reveal" data-day="9">
         <div class="day__num glass"><small>DAG</small><b>09</b></div>
@@ -489,6 +567,7 @@
           </div>
         </div>
       </div>
+      <div class="leg" data-to="10" aria-hidden="true"><span>Åndalsnes → Trollstigen</span></div>
       <!-- DAG 10 -->
       <div class="day reveal" data-day="10">
         <div class="day__num glass"><small>DAG</small><b>10</b></div>
@@ -644,9 +723,9 @@
 </section>
 
 <footer>
-  <span class="disp">Klaar voor de bergen.</span>
-  Noorwegen · 10 dagen · 3 nachten stad + 7 dagen bergen — 4 vrienden, juli 2026.<br>
-  Foto's via Google Places · satellietbeelden via Google Maps &amp; NASA Blue Marble.
+  <span class="disp">Vier vrienden. Eén zomer.<br>Dit wordt 'm.</span>
+  <p class="foot-line">Tien dagen Noorwegen — drie nachten stad, zeven dagen bergen. Boek je vlucht, pak je rugzak, en we zien elkaar boven op de rug.</p>
+  <p class="foot-meta mono">Juli 2026 · gemaakt voor ons · foto's via Google Places · satelliet via Esri &amp; NASA Blue Marble</p>
 </footer>
 
 <!-- ===== DAY DETAIL OVERLAY ===== -->
@@ -846,6 +925,9 @@
 
 <script>
 /* ===== UI ===== */
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+window.__reducedMotion=RM;
+setTimeout(()=>{window.__introReady=true;},5000); // hard safety: intro never stays stuck
 const prog=document.getElementById('progress');
 const navLinks=document.getElementById('navLinks');
 document.getElementById('navToggle').addEventListener('click',()=>navLinks.classList.toggle('open'));
@@ -853,24 +935,61 @@ navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLink
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
+/* ----- preloader: hold briefly, then reveal ----- */
+(function(){
+  const pre=document.getElementById('preloader');if(!pre)return;
+  let gone=false;
+  function hide(){if(gone)return;gone=true;pre.classList.add('done');window.__introReady=true;setTimeout(()=>{pre.style.display='none';},1000);}
+  window.addEventListener('load',()=>setTimeout(hide,RM?150:700));
+  setTimeout(hide,4500); // safety net so it never gets stuck
+})();
+
+/* ----- images: shimmer while loading, fade in, clean fallback on error ----- */
+document.querySelectorAll('img').forEach(img=>{
+  img.classList.add('img-load');
+  const ready=()=>img.classList.add('img-ready');
+  if(img.complete&&img.naturalWidth>0){ready();}
+  else{
+    img.addEventListener('load',ready,{once:true});
+    img.addEventListener('error',()=>{img.classList.remove('img-load');img.classList.add('img-error');img.removeAttribute('src');},{once:true});
+  }
+});
+
 /* ===== Day detail overlay ===== */
 const layer=document.getElementById('detailLayer');
 const details=document.querySelectorAll('.detail');
+let lastFocus=null;
 function openDay(n){
-  details.forEach(d=>d.classList.remove('active'));
   const d=document.getElementById('detail-'+n);
   if(!d)return;
+  lastFocus=document.activeElement;
+  details.forEach(x=>x.classList.remove('active'));
   d.classList.add('active');
   layer.classList.add('open');
   document.body.classList.add('locked');
   layer.scrollTop=0;
+  const back=d.querySelector('[data-close]');if(back)setTimeout(()=>back.focus(),60);
 }
-function closeDay(){layer.classList.remove('open');document.body.classList.remove('locked');}
+function closeDay(){
+  if(!layer.classList.contains('open'))return;
+  layer.classList.remove('open');
+  document.body.classList.remove('locked');
+  if(lastFocus&&lastFocus.focus){try{lastFocus.focus();}catch(e){}}
+}
 document.querySelectorAll('[data-day]').forEach(el=>{
-  el.addEventListener('click',()=>openDay(el.getAttribute('data-day')));
+  const day=el.getAttribute('data-day');
+  el.setAttribute('tabindex','0');
+  el.setAttribute('role','button');
+  el.setAttribute('aria-label','Dag '+day+' — bekijk de volledige dagpagina');
+  el.addEventListener('click',()=>openDay(day));
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openDay(day);}});
 });
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeDay));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
+
+/* tiny delight: tap the logo dot for a brief aurora flare */
+(function(){const dot=document.querySelector('.brand .dot');if(!dot)return;
+  dot.addEventListener('click',()=>{document.body.classList.add('flare');clearTimeout(dot.__t);dot.__t=setTimeout(()=>document.body.classList.remove('flare'),1300);});})();
 
 /* ===== 3D Earth: scroll-driven satellite tour ===== */
 (function(){
@@ -958,7 +1077,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   const prog=document.getElementById('progress');
 
   const restZ=260,closeZ=mobile?116:108,flyZ=mobile?165:150,introZ=470,SPIN=Math.PI*6,DUR=3400;
-  const start=performance.now();let introDone=false,paused=false;
+  const RM=window.__reducedMotion;
+  let start=null;let introDone=RM,paused=false;
+  if(RM){camera.position.z=restZ;atmo.material.uniforms.uI.value=1.2;}
   const introSpin=new THREE.Quaternion(),YAXIS=new THREE.Vector3(0,1,0);
   const targetQ=WP[0].q.clone(),tmpQ=new THREE.Quaternion(),faced=new THREE.Vector3(),wpos=new THREE.Vector3();
   globe.quaternion.copy(WP[0].q);
@@ -986,6 +1107,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   function frame(now){
     requestAnimationFrame(frame);if(paused)return;
     if(!introDone){
+      if(start===null){
+        if(!window.__introReady){          // hold the distant globe until the preloader lifts
+          globe.quaternion.copy(WP[0].q);
+          camera.position.z=introZ;
+          atmo.material.uniforms.uI.value=0;
+          camera.lookAt(0,0,0);
+          renderer.render(scene,camera);
+          return;
+        }
+        start=now;                          // the unboxing begins now
+      }
       const tr=Math.min((now-start)/DUR,1),e=smooth(tr);
       introSpin.setFromAxisAngle(YAXIS,SPIN*(1-e));
       globe.quaternion.copy(WP[0].q).multiply(introSpin);
@@ -1033,6 +1165,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     updateOpacity();
     paused=opacity<=0.02;
     if(labelWrap&&opacity<=0.3)labelWrap.style.opacity='0';   // never let the globe label stick when faded
+    if(!RM){const blur=Math.min(1,window.scrollY/(0.55*H))*3.5; // crisp at the very top, a touch soft once you scroll
+      mount.style.filter=blur>0.05?('blur('+blur.toFixed(2)+'px)'):'none';}
   },{passive:true});
   updateOpacity();
 
@@ -1063,28 +1197,39 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     ['Galdhøpiggen',61.636,8.313,13],['Åndalsnes',62.567,7.687,12],['Romsdalseggen',62.546,7.776,13],
     ['Trollstigen',62.456,7.671,14]
   ];
-  const cards=Array.from(document.querySelectorAll('#plan [data-day]'));
+  // ordered stops: travel legs (point to the upcoming day) + day cards
+  const stops=Array.from(document.querySelectorAll('#plan .leg,#plan [data-day]')).map(el=>{
+    const day=el.classList.contains('leg')?parseInt(el.dataset.to,10):parseInt(el.dataset.day,10);
+    return {el,idx:Math.max(0,Math.min((day||1)-1,WP.length-1))};
+  });
   function activeIdx(){
-    const vc=innerHeight*0.5;let lo=-1;
-    for(let i=0;i<cards.length;i++){const r=cards[i].getBoundingClientRect();if(r.top+r.height*0.5<=vc)lo=i;}
-    return Math.max(0,Math.min(lo,cards.length-1));
+    const vc=innerHeight*0.5;let cur=0;
+    for(let i=0;i<stops.length;i++){const r=stops[i].el.getBoundingClientRect();if(r.top+r.height*0.5<=vc)cur=stops[i].idx;}
+    return cur;
   }
+  const RM=window.__reducedMotion;
+  const vign=document.getElementById('map-vignette');
   let lastKey='',raf=0;
+  function goTo(lat,lon,z,dur){
+    if(RM){map.setView([lat,lon],z,{animate:false});return;}
+    map.flyTo([lat,lon],z,{duration:dur,easeLinearity:0.18});
+  }
   function update(){
     raf=0;
     const pr=planSec.getBoundingClientRect();
     const enter=Math.min(Math.max((1.15*innerHeight-pr.top)/(0.7*innerHeight),0),1);
     const fade=pr.bottom<innerHeight?Math.min(Math.max(pr.bottom/innerHeight,0),1):1;
-    const op=enter*fade*0.9;
+    const op=enter*fade*0.92;
     el.style.opacity=op.toFixed(3);
+    if(vign)vign.style.opacity=(op*0.95).toFixed(3);
     if(flyname)flyname.style.opacity=op>0.12?'1':'0';
     let key,w;
     if(enter<0.12){key='NO';}else{const i=activeIdx();key='d'+i;w=WP[i];}
     if(key!==lastKey){
       lastKey=key;
       try{
-        if(key==='NO'){map.flyTo([61.8,9.0],6,{duration:1.3});if(flyname)flyname.innerHTML='<b>NOORWEGEN</b> · satelliet';}
-        else{map.flyTo([w[1],w[2]],w[3],{duration:1.7});if(flyname)flyname.innerHTML='<b>'+w[0].toUpperCase()+'</b> · stadsniveau';}
+        if(key==='NO'){goTo(61.8,9.0,6,1.3);if(flyname)flyname.innerHTML='<b>NOORWEGEN</b> · satelliet';}
+        else{goTo(w[1],w[2],w[3],1.8);if(flyname)flyname.innerHTML='<b>'+w[0].toUpperCase()+'</b> · stadsniveau';}
       }catch(e){}
     }
   }
