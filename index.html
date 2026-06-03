@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root{
     --bg:#05080b; --ink:#eef4f7; --ink-soft:#aeb9c2; --ink-dim:#76828c;
@@ -38,6 +40,11 @@
   @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5vw,-7vh) scale(1.2)}}
   #grain{position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   #globe{position:fixed;inset:0;z-index:-2}
+  #flymap{position:fixed;inset:0;z-index:-2;opacity:0;pointer-events:none;background:#05080b;filter:saturate(1.08) contrast(1.04) brightness(.9)}
+  #flymap .leaflet-control-attribution{font-size:9px;background:rgba(0,0,0,.45);color:#9aa6b0}
+  #flymap .leaflet-control-attribution a{color:#bcd}
+  #flyname{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;padding:8px 15px;border-radius:100px;white-space:nowrap;background:rgba(5,8,11,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-line);color:var(--ice);opacity:0;transition:opacity .5s ease;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  #flyname b{color:var(--aurora)}
   #globe canvas{display:block}
 
   .glass{background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
@@ -66,11 +73,11 @@
   .slide{min-height:100svh;display:flex;align-items:center;scroll-snap-align:start;position:relative}
   .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:120px clamp(18px,4vw,48px)}
   .flow{padding:clamp(56px,9vh,110px) clamp(18px,4vw,48px)}
-  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:18px}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:18px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
   .eyebrow.amber{color:var(--amber)}
-  h2.sec{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.0;letter-spacing:-.02em;max-width:17ch}
+  h2.sec{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.0;letter-spacing:-.02em;max-width:17ch;text-shadow:0 2px 22px rgba(0,0,0,.6)}
   h2.sec em{font-style:italic;font-weight:500;color:var(--ice)}
-  .lead{max-width:60ch;margin-top:22px;color:var(--ink-soft);font-size:clamp(1rem,1.4vw,1.16rem)}
+  .lead{max-width:60ch;margin-top:22px;color:#c8d1d8;font-size:clamp(1rem,1.4vw,1.16rem);text-shadow:0 1px 14px rgba(0,0,0,.8)}
 
   #hero{position:relative;z-index:2;text-align:center;flex-direction:column;justify-content:center;overflow:hidden}
   #hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(68% 58% at 50% 47%,rgba(4,7,10,.72),rgba(4,7,10,.34) 50%,transparent 74%)}
@@ -121,7 +128,7 @@
 
   .plan-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
   .badge-rec{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#04060a;background:var(--aurora);padding:9px 15px;border-radius:100px;font-weight:700;box-shadow:0 0 24px rgba(121,236,174,.4)}
-  .hint{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--ink-dim);margin-top:20px;display:flex;align-items:center;gap:8px}
+  .hint{font-family:'Space Mono',monospace;font-size:.7rem;color:#9aa6b0;margin-top:20px;display:flex;align-items:center;gap:8px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
   .hint::before{content:"☞";color:var(--aurora)}
   .timeline{margin-top:30px;position:relative}
   .timeline::before{content:"";position:absolute;left:26px;top:10px;bottom:30px;width:2px;background:linear-gradient(var(--aurora),var(--ice) 55%,var(--amber));opacity:.35}
@@ -266,6 +273,8 @@
 
 <div id="bg-aurora"><i class="blob1"></i><i class="blob2"></i><i class="blob3"></i></div>
 <div id="globe"></div>
+<div id="flymap"></div>
+<div id="flyname"></div>
 <div id="grain"></div>
 <div id="progress"></div>
 <div id="marker-label"><div class="ml"><b>NOORWEGEN</b> · 61°N 9°E</div></div>
@@ -927,8 +936,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
 
   // satellite reticle (locks onto the point facing the camera)
   const mk=new THREE.Group();
-  mk.add(new THREE.Mesh(new THREE.SphereGeometry(1.5,16,16),new THREE.MeshBasicMaterial({color:0x9affc9})));
-  const ring=new THREE.Mesh(new THREE.RingGeometry(2.4,3.0,42),new THREE.MeshBasicMaterial({color:0x79ecae,transparent:true,opacity:.85,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  mk.add(new THREE.Mesh(new THREE.SphereGeometry(1.1,16,16),new THREE.MeshBasicMaterial({color:0x9affc9})));
+  const ring=new THREE.Mesh(new THREE.RingGeometry(2.0,2.5,42),new THREE.MeshBasicMaterial({color:0x79ecae,transparent:true,opacity:.8,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
   mk.add(ring);globe.add(mk);
 
   // map lat/lon to a direction on the textured sphere
@@ -947,7 +956,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   const planSec=document.getElementById('plan');
   const prog=document.getElementById('progress');
 
-  const restZ=255,zNear=mobile?185:172,zFar=305,introZ=460,SPIN=Math.PI*6,DUR=3400;
+  const restZ=260,closeZ=mobile?116:108,flyZ=mobile?165:150,introZ=470,SPIN=Math.PI*6,DUR=3400;
   const start=performance.now();let introDone=false,paused=false;
   const introSpin=new THREE.Quaternion(),YAXIS=new THREE.Vector3(0,1,0);
   const targetQ=WP[0].q.clone(),tmpQ=new THREE.Quaternion(),faced=new THREE.Vector3(),wpos=new THREE.Vector3();
@@ -966,9 +975,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   }
   function updateOpacity(){
     if(!planSec)return;const pr=planSec.getBoundingClientRect();
-    const enter=Math.min(Math.max((H-pr.top)/H,0),1);
-    let base=1-0.42*enter;                      // dim a bit during the plan so cards stay legible
+    const enter=Math.min(Math.max((1.15*H-pr.top)/(0.7*H),0),1);
     let fade=pr.bottom<H?Math.min(Math.max(pr.bottom/H,0),1):1; // fade out after the plan ends
+    // hand over to the detailed satellite map during the plan; if no map, keep the globe tour (dimmed)
+    let base=window.__hasFlyMap?(1-enter):(1-0.5*enter);
     opacity=base*fade;mount.style.opacity=opacity.toFixed(3);
   }
 
@@ -984,24 +994,29 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     }else{
       const tp=tourPos();
       const pr=planSec?planSec.getBoundingClientRect():{top:H};
-      const enter=Math.min(Math.max((H-pr.top)/H,0),1);
+      // engage early: commit to the close zoom well before the plan is centred
+      const engage=Math.min(Math.max((1.25*H-pr.top)/(0.55*H),0),1);
       tmpQ.copy(WP[tp.i0].q).slerp(WP[Math.min(tp.i0+1,WP.length-1)].q,smooth(tp.frac));
       targetQ.copy(tmpQ);
-      const dip=Math.sin(Math.PI*tp.frac);          // 0 on a location, 1 mid-flight
-      const tourZ=zNear+(zFar-zNear)*dip;            // zoom out between, zoom in on arrival
-      const targetZ=restZ+(tourZ-restZ)*enter;       // blend with the calm hero distance
+      const dip=Math.sin(Math.PI*tp.frac);          // 0 = locked on a place, 1 = mid-flight
+      const tourZ=closeZ+(flyZ-closeZ)*dip;          // dive onto the spot, pull back a little to fly
+      const targetZ=restZ+(tourZ-restZ)*engage;      // restZ in the hero, dives in fast
       lock=1-dip;labelName=WP[Math.round(tp.i0+tp.frac)].name;
-      globe.quaternion.slerp(targetQ,0.11);          // buttery glide
-      camera.position.z+=(targetZ-camera.position.z)*0.10;
+      globe.quaternion.slerp(targetQ,0.12);          // buttery glide
+      camera.position.z+=(targetZ-camera.position.z)*0.085;
     }
+    const zr=Math.min(1,Math.max(0,(camera.position.z-closeZ)/(restZ-closeZ)));
+    camera.position.y=8*zr;                                   // dead-on when zoomed in, slight tilt when far
+    if(introDone)atmo.material.uniforms.uI.value=1.25*zr;     // atmosphere fades as we dive in
     camera.lookAt(0,0,0);
     // keep the reticle on the point currently facing the camera
     faced.copy(FRONT).applyQuaternion(globe.quaternion.clone().invert());
     mk.position.copy(faced.multiplyScalar(R*1.012));
     mk.lookAt(mk.position.clone().multiplyScalar(2));
+    mk.scale.setScalar(Math.max(0.5,camera.position.z/210));  // steady on-screen size at any zoom
     ring.rotation.z+=0.012;const ps=1+Math.sin(now*0.004)*0.3;ring.scale.set(ps,ps,ps);
     const showLock=introDone?lock:1;
-    mk.visible=opacity>0.05&&showLock>0.15;ring.material.opacity=0.85*showLock;
+    mk.visible=opacity>0.05&&showLock>0.15;ring.material.opacity=0.8*showLock;
     if(labelWrap)labelWrap.style.opacity=(opacity>0.25&&showLock>0.45)?'1':'0';
     if(labelEl)labelEl.innerHTML='<b>'+labelName.toUpperCase()+'</b> · target lock';
     stars.rotation.y+=0.0002;
@@ -1015,12 +1030,65 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
     if(prog)prog.style.width=(h.scrollTop/(max||1)*100)+'%';
     updateOpacity();
-    const wasPaused=paused;paused=opacity<=0.02;
-    if(wasPaused&&!paused)requestAnimationFrame(frame);
+    paused=opacity<=0.02;
   },{passive:true});
   updateOpacity();
 
   window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);updateOpacity();});
+})();
+
+/* ===== Detailed satellite fly-map for the plan (Leaflet + Esri imagery) ===== */
+(function(){
+  const el=document.getElementById('flymap');
+  const planSec=document.getElementById('plan');
+  const flyname=document.getElementById('flyname');
+  if(!window.L||!el||!planSec){return;}   // no Leaflet → the 3D globe stays as the plan background
+  let map;
+  try{
+    map=L.map(el,{zoomControl:false,attributionControl:true,dragging:false,scrollWheelZoom:false,
+      doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,tap:false,inertia:false,
+      fadeAnimation:true,zoomAnimation:true});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {maxZoom:18,minZoom:3,attribution:'Imagery &copy; Esri, Maxar, Earthstar Geographics'}).addTo(map);
+    map.setView([61.8,9.0],6);   // detailed map of southern/central Norway to start
+  }catch(err){return;}
+  window.__hasFlyMap=true;
+
+  // [name, lat, lon, city-level zoom]
+  const WP=[
+    ['Oslo',59.913,10.752,12],['Oslo',59.913,10.752,12],['Oslo',59.913,10.752,12],
+    ['Gjende',61.495,8.793,12],['Besseggen',61.521,8.715,13],['Spiterstulen',61.628,8.404,13],
+    ['Galdhøpiggen',61.636,8.313,13],['Åndalsnes',62.567,7.687,12],['Romsdalseggen',62.546,7.776,13],
+    ['Trollstigen',62.456,7.671,14]
+  ];
+  const cards=Array.from(document.querySelectorAll('#plan [data-day]'));
+  function activeIdx(){
+    const vc=innerHeight*0.5;let lo=-1;
+    for(let i=0;i<cards.length;i++){const r=cards[i].getBoundingClientRect();if(r.top+r.height*0.5<=vc)lo=i;}
+    return Math.max(0,Math.min(lo,cards.length-1));
+  }
+  let lastKey='',raf=0;
+  function update(){
+    raf=0;
+    const pr=planSec.getBoundingClientRect();
+    const enter=Math.min(Math.max((1.15*innerHeight-pr.top)/(0.7*innerHeight),0),1);
+    const fade=pr.bottom<innerHeight?Math.min(Math.max(pr.bottom/innerHeight,0),1):1;
+    const op=enter*fade*0.7;
+    el.style.opacity=op.toFixed(3);
+    if(flyname)flyname.style.opacity=op>0.12?'1':'0';
+    let key,w;
+    if(enter<0.12){key='NO';}else{const i=activeIdx();key='d'+i;w=WP[i];}
+    if(key!==lastKey){
+      lastKey=key;
+      try{
+        if(key==='NO'){map.flyTo([61.8,9.0],6,{duration:1.3});if(flyname)flyname.innerHTML='<b>NOORWEGEN</b> · satelliet';}
+        else{map.flyTo([w[1],w[2]],w[3],{duration:1.7});if(flyname)flyname.innerHTML='<b>'+w[0].toUpperCase()+'</b> · stadsniveau';}
+      }catch(e){}
+    }
+  }
+  addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(update);},{passive:true});
+  addEventListener('resize',()=>{try{map.invalidateSize();}catch(e){}if(!raf)raf=requestAnimationFrame(update);});
+  setTimeout(()=>{try{map.invalidateSize();}catch(e){}update();},250);
 })();
 </script>
 </body>
