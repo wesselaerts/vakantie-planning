@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noorwegen · 10 dagen — 3 nachten stad, 7 dagen bergen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d10;
+    --bg-2:#0f1318;
+    --surface:#141a20;
+    --surface-2:#1b232b;
+    --line:#26313b;
+    --ink:#eef3f6;
+    --ink-soft:#aab6c0;
+    --ink-dim:#7a8893;
+    --aurora:#74e6a8;
+    --aurora-deep:#36b888;
+    --ice:#6fcbe0;
+    --amber:#ffb16a;
+    --amber-deep:#ff8a4c;
+    --magenta:#e57bb0;
+    --maxw:1200px;
+    --r:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Archivo',sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* grain overlay */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .mono{font-family:'Space Mono',monospace;letter-spacing:.04em}
+  .disp{font-family:'Fraunces',serif}
+
+  /* ---------- progress + nav ---------- */
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--aurora),var(--ice));z-index:1000;transition:width .1s linear}
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:900;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px clamp(18px,4vw,48px);
+    backdrop-filter:blur(12px);
+    background:rgba(10,13,16,.55);
+    border-bottom:1px solid transparent;
+    transition:background .3s,border-color .3s,padding .3s;
+  }
+  nav.solid{background:rgba(10,13,16,.92);border-color:var(--line)}
+  .brand{font-family:'Fraunces',serif;font-weight:900;font-size:1.05rem;letter-spacing:.02em;display:flex;align-items:center;gap:9px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--aurora);box-shadow:0 0 14px var(--aurora)}
+  .nav-links{display:flex;gap:26px}
+  .nav-links a{font-size:.74rem;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-soft);font-weight:600;transition:color .2s}
+  .nav-links a:hover{color:var(--aurora)}
+  .nav-toggle{display:none;background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 11px;font-size:.7rem;letter-spacing:.1em;cursor:pointer}
+  @media(max-width:860px){
+    .nav-links{position:fixed;inset:60px 0 auto 0;flex-direction:column;background:rgba(10,13,16,.97);padding:18px clamp(18px,4vw,48px);gap:14px;border-bottom:1px solid var(--line);transform:translateY(-130%);transition:transform .35s ease}
+    .nav-links.open{transform:translateY(0)}
+    .nav-toggle{display:block}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden}
+  .hero__bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.08);filter:saturate(1.05)}
+  .hero::before{content:"";position:absolute;inset:0;z-index:1;
+    background:linear-gradient(180deg,rgba(10,13,16,.55) 0%,rgba(10,13,16,.15) 35%,rgba(10,13,16,.7) 78%,var(--bg) 100%)}
+  .hero__inner{position:relative;z-index:2;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 clamp(18px,4vw,48px) clamp(46px,8vh,90px)}
+  .kicker{display:inline-flex;align-items:center;gap:10px;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--aurora);font-weight:700;margin-bottom:22px}
+  .kicker::before{content:"";width:34px;height:1px;background:var(--aurora)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:900;line-height:.92;font-size:clamp(3.2rem,11vw,8.2rem);letter-spacing:-.02em}
+  .hero h1 em{font-style:italic;font-weight:500;color:var(--ice)}
+  .hero__sub{max-width:620px;margin-top:24px;font-size:clamp(1rem,1.6vw,1.22rem);color:var(--ink-soft)}
+  .hero__meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .pill{font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.04em;padding:8px 14px;border:1px solid var(--line);border-radius:100px;color:var(--ink);background:rgba(20,26,32,.6)}
+  .pill b{color:var(--aurora)}
+  .scrolldown{position:absolute;right:clamp(18px,4vw,48px);bottom:38px;z-index:2;writing-mode:vertical-rl;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim)}
+  .scrolldown span{display:block;width:1px;height:50px;background:linear-gradient(var(--aurora),transparent);margin:12px auto 0}
+  @media(max-width:860px){.scrolldown{display:none}}
+
+  /* ---------- layout ---------- */
+  section{position:relative}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:clamp(64px,10vh,120px) clamp(18px,4vw,48px)}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--aurora);margin-bottom:16px}
+  .eyebrow.amber{color:var(--amber)}
+  h2.sec{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2rem,5vw,3.4rem);line-height:1.02;letter-spacing:-.02em;max-width:18ch}
+  h2.sec em{font-style:italic;font-weight:500;color:var(--ice)}
+  .lead{max-width:62ch;margin-top:22px;color:var(--ink-soft);font-size:clamp(1rem,1.3vw,1.12rem)}
+
+  /* intro stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:48px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 20px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--aurora),transparent)}
+  .stat .n{font-family:'Fraunces',serif;font-weight:900;font-size:2.5rem;line-height:1;color:var(--ink)}
+  .stat .l{margin-top:10px;font-size:.82rem;color:var(--ink-dim);letter-spacing:.02em}
+  @media(max-width:780px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,70px);align-items:center}
+  @media(max-width:880px){.split{grid-template-columns:1fr}}
+  .split-media{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);aspect-ratio:4/3;position:relative}
+  .split-media img{width:100%;height:100%;object-fit:cover}
+  .media-cap{position:absolute;left:14px;bottom:12px;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.06em;background:rgba(10,13,16,.7);backdrop-filter:blur(4px);padding:6px 11px;border-radius:8px;border:1px solid var(--line)}
+
+  /* concept two-column note */
+  .splitcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+  @media(max-width:680px){.splitcards{grid-template-columns:1fr}}
+  .ccard{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--bg-2)}
+  .ccard h4{font-family:'Fraunces',serif;font-size:1.2rem;margin-bottom:8px}
+  .ccard.green h4{color:var(--aurora)} .ccard.amber h4{color:var(--amber)}
+  .ccard p{font-size:.92rem;color:var(--ink-soft)}
+
+  /* ---------- toppers gallery ---------- */
+  .toppers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+  @media(max-width:880px){.toppers{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.toppers{grid-template-columns:1fr}}
+  .topper{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:3/3.7;border:1px solid var(--line);isolation:isolate}
+  .topper img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+  .topper:hover img{transform:scale(1.07)}
+  .topper::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(8,11,14,.9) 100%);z-index:1}
+  .topper .meta{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:20px}
+  .topper .rank{position:absolute;top:14px;left:14px;z-index:2;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.08em;background:rgba(10,13,16,.7);border:1px solid var(--line);padding:5px 10px;border-radius:7px;color:var(--aurora)}
+  .topper h3{font-family:'Fraunces',serif;font-weight:700;font-size:1.45rem;line-height:1.05}
+  .topper .sub{font-size:.82rem;color:var(--ink-soft);margin-top:6px}
+  .topper .nums{display:flex;gap:14px;margin-top:12px;font-family:'Space Mono',monospace;font-size:.68rem;color:var(--ink-dim)}
+  .topper .nums b{color:var(--ice);font-weight:400}
+
+  /* ---------- itinerary ---------- */
+  .plan-head{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between}
+  .badge-rec{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#0a0d10;background:var(--aurora);padding:7px 13px;border-radius:100px;font-weight:700}
+  .timeline{margin-top:50px;position:relative}
+  .timeline::before{content:"";position:absolute;left:25px;top:8px;bottom:60px;width:2px;background:linear-gradient(var(--aurora),var(--ice) 60%,var(--amber));opacity:.4}
+  @media(max-width:760px){.timeline::before{left:19px}}
+  .day{position:relative;padding-left:72px;margin-bottom:30px}
+  @media(max-width:760px){.day{padding-left:54px}}
+  .day__num{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;background:var(--surface);border:2px solid var(--aurora);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Mono',monospace;z-index:2}
+  @media(max-width:760px){.day__num{width:40px;height:40px}}
+  .day__num small{font-size:.5rem;letter-spacing:.1em;color:var(--ink-dim);line-height:1}
+  .day__num b{font-size:1.05rem;color:var(--ink);line-height:1.1}
+  .day.night .day__num{border-color:var(--amber)}
+  .day.night .day__num b{color:var(--amber)}
+  .day__card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:grid;grid-template-columns:300px 1fr}
+  @media(max-width:760px){.day__card{grid-template-columns:1fr}}
+  .day__media{position:relative;min-height:200px;overflow:hidden}
+  .day__media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .day__media .geo{position:absolute;left:12px;bottom:10px;font-family:'Space Mono',monospace;font-size:.62rem;background:rgba(10,13,16,.7);padding:4px 9px;border-radius:6px;border:1px solid var(--line);letter-spacing:.04em}
+  .day__body{padding:24px 26px}
+  .day__route{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.06em;color:var(--aurora);text-transform:uppercase;margin-bottom:8px}
+  .day.night .day__route{color:var(--amber)}
+  .day__body h3{font-family:'Fraunces',serif;font-weight:700;font-size:1.45rem;line-height:1.05;margin-bottom:10px}
+  .day__body p{font-size:.93rem;color:var(--ink-soft)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.03em;border:1px solid var(--line);border-radius:7px;padding:5px 10px;color:var(--ink-soft);background:var(--bg-2)}
+  .chip.stay{border-color:rgba(116,230,168,.4);color:var(--aurora);background:rgba(116,230,168,.07)}
+  .chip.stay.night{border-color:rgba(255,177,106,.4);color:var(--amber);background:rgba(255,177,106,.07)}
+  .chip.hard{border-color:rgba(229,123,176,.4);color:var(--magenta)}
+
+  /* satellite map block */
+  .mapwrap{margin-top:18px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);position:relative;background:var(--surface)}
+  .mapwrap iframe{width:100%;height:100%;border:0;display:block;filter:grayscale(.1) contrast(1.02)}
+  .map-tall{aspect-ratio:16/9}
+  .map-label{position:absolute;top:12px;left:12px;z-index:2;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.08em;background:rgba(10,13,16,.78);border:1px solid var(--line);padding:6px 11px;border-radius:8px;color:var(--ice)}
+
+  /* practical grid */
+  .prac{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:46px}
+  @media(max-width:760px){.prac{grid-template-columns:1fr}}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+  .pcard .ico{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.1em;color:var(--aurora);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .pcard .ico::before{content:"";width:22px;height:2px;background:var(--aurora)}
+  .pcard h4{font-family:'Fraunces',serif;font-size:1.25rem;margin-bottom:12px}
+  .pcard ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .pcard li{font-size:.9rem;color:var(--ink-soft);padding-left:18px;position:relative}
+  .pcard li::before{content:"›";position:absolute;left:0;color:var(--ice);font-weight:700}
+  .pcard li b{color:var(--ink)}
+  .pcard.night .ico{color:var(--amber)} .pcard.night .ico::before{background:var(--amber)}
+  .pcard.night li::before{color:var(--amber)}
+
+  /* alternatives */
+  .alts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:46px}
+  @media(max-width:860px){.alts{grid-template-columns:1fr}}
+  .alt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+  .alt__imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;height:150px}
+  .alt__imgs img{width:100%;height:100%;object-fit:cover}
+  .alt__body{padding:26px}
+  .alt__tag{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
+  .alt__body h3{font-family:'Fraunces',serif;font-weight:700;font-size:1.55rem;line-height:1.05;margin-bottom:6px}
+  .alt__body h3 em{font-style:italic;color:var(--ice);font-weight:500}
+  .alt__body>p{font-size:.92rem;color:var(--ink-soft);margin:12px 0}
+  .alt__list{list-style:none;display:flex;flex-direction:column;gap:7px;margin:14px 0;border-top:1px solid var(--line);padding-top:14px}
+  .alt__list li{font-size:.85rem;color:var(--ink-soft);display:flex;gap:12px}
+  .alt__list li span{font-family:'Space Mono',monospace;color:var(--aurora);font-size:.72rem;flex-shrink:0;width:60px}
+  .verdict{margin-top:auto;font-size:.82rem;padding:14px 16px;border-radius:12px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink-soft)}
+  .verdict b{color:var(--amber)}
+
+  /* checklist / cta */
+  .check{background:linear-gradient(135deg,var(--surface),var(--bg-2));border:1px solid var(--line);border-radius:24px;padding:clamp(30px,5vw,56px);margin-top:48px;position:relative;overflow:hidden}
+  .check::before{content:"";position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(116,230,168,.18),transparent 70%)}
+  .check h3{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(1.6rem,3.5vw,2.4rem);margin-bottom:8px}
+  .check .clist{display:grid;grid-template-columns:1fr 1fr;gap:12px 30px;margin-top:26px}
+  @media(max-width:680px){.check .clist{grid-template-columns:1fr}}
+  .check .clist div{display:flex;gap:12px;align-items:flex-start;font-size:.92rem;color:var(--ink-soft);padding:10px 0;border-bottom:1px solid var(--line)}
+  .check .clist .b{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--aurora);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:var(--aurora);font-size:.7rem}
+  .check .clist b{color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);padding:50px clamp(18px,4vw,48px);text-align:center;color:var(--ink-dim);font-size:.82rem}
+  footer .disp{font-size:1.4rem;color:var(--ink);display:block;margin-bottom:10px}
+  .note{font-size:.78rem;color:var(--ink-dim);margin-top:30px;line-height:1.7;max-width:80ch}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<nav id="nav">
+  <div class="brand"><span class="dot"></span>NORD&nbsp;·&nbsp;10</div>
+  <button class="nav-toggle" id="navToggle">MENU</button>
+  <div class="nav-links" id="navLinks">
+    <a href="#concept">Concept</a>
+    <a href="#toppers">Toppers</a>
+    <a href="#plan">Het plan</a>
+    <a href="#kaart">Kaart</a>
+    <a href="#praktisch">Praktisch</a>
+    <a href="#alternatieven">Alternatieven</a>
+    <a href="#boeken">Boeken</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero__bg" style="background-image:url('https://lh3.googleusercontent.com/place-photos/AJRVUZMvyMXwbHyWc1MvarN4G1JAWLHK4-jYjJX1GaUiKyS3DvYKum6qlcYJ6ptWaN5RHoTXnFJcJp-hkJwkAT-cTU0-baqN8seQt16NKOp67V7QIkTe-ms6Uu9W2wBs64xqd4676lrTXbw5fq_mqg=s4800-w800-h600')"></div>
+  <div class="hero__inner">
+    <span class="kicker">Reisplan · Zomer 2026 · 4 vrienden</span>
+    <h1>NOORWEGEN<br><em>in tien dagen</em></h1>
+    <p class="hero__sub">Drie nachten knallen in de stad. Zeven dagen de hoogste bergen van Scandinavië in — met kampvuurloze nachten boven op de rug. Eén trip, twee werelden.</p>
+    <div class="hero__meta">
+      <span class="pill"><b>3</b> dagen nachtleven</span>
+      <span class="pill"><b>7</b> dagen bergen &amp; hikes</span>
+      <span class="pill"><b>2</b> bergovernachtingen</span>
+      <span class="pill"><b>3</b> iconische toppen</span>
+    </div>
+  </div>
+  <div class="scrolldown">scroll<span></span></div>
+</header>
+
+<!-- CONCEPT -->
+<section id="concept">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">01 — Het idee</div></div>
+    <div class="reveal d1"><h2 class="sec">Stad en stilte, <em>strak verdeeld</em>.</h2></div>
+    <p class="lead reveal d2">Jullie wilden het allebei: een paar nachten echt los in een stad mét scene, en daarna de bergen in met mooie hikes en slapen op hoogte — net als dat idee om bij Trolltunga boven te kamperen. Dit plan zet die twee helften netjes naast elkaar. Je start met <strong>Oslo</strong> (de enige stad met een volwaardige uitgaansscene en jonge studentenmassa) en duikt daarna in <strong>Jotunheimen</strong> en <strong>Romsdalen</strong> — Noorwegens hoogste pieken en mooiste bergruggen, allemaal autovrij bereikbaar.</p>
+
+    <div class="stats">
+      <div class="stat reveal"><div class="n">2469<span style="font-size:1rem">m</span></div><div class="l">Galdhøpiggen — dak van Noord-Europa</div></div>
+      <div class="stat reveal d1"><div class="n">≈ 0</div><div class="l">euro voor wild kamperen (allemansrett)</div></div>
+      <div class="stat reveal d2"><div class="n">03:00</div><div class="l">sluitingstijd clubs in Oslo</div></div>
+      <div class="stat reveal d3"><div class="n">~1u45</div><div class="l">directe vlucht Amsterdam → Oslo</div></div>
+    </div>
+
+    <div class="splitcards">
+      <div class="ccard green reveal"><h4>De 7 bergdagen</h4><p>Besseggen-rug, de top van Galdhøpiggen en de wereldberoemde Romsdalseggen. Slapen in berghutten bij het Gjende-meer en aan de voet van de hoogste piek — of je tent op de rug. Hoge bergen, geen technisch klimwerk.</p></div>
+      <div class="ccard amber reveal d1"><h4>De 3 stadsdagen</h4><p>Oslo is je uitvalsbasis. Grünerløkka voor de bohemien-bars en livemuziek, Youngstorget voor de techno-clubs. Jong publiek, lange zomeravonden, en — eerlijk — peperdure drank, dus voorgloeien is hier een nationale sport.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOPPERS -->
+<section id="toppers" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">02 — De toppers</div></div>
+    <div class="reveal d1"><h2 class="sec">De plekken waar je <em>voor komt</em>.</h2></div>
+    <p class="lead reveal d2">De must-do's van dit plan, plus de iconen die je als alternatief kunt inruilen. Allemaal beoordeeld op wat het mooiste is voor fitte twintigers die niet bang zijn voor een lange dag op de been.</p>
+
+    <div class="toppers">
+      <article class="topper reveal">
+        <span class="rank">MUST · 01</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZMvyMXwbHyWc1MvarN4G1JAWLHK4-jYjJX1GaUiKyS3DvYKum6qlcYJ6ptWaN5RHoTXnFJcJp-hkJwkAT-cTU0-baqN8seQt16NKOp67V7QIkTe-ms6Uu9W2wBs64xqd4676lrTXbw5fq_mqg=s4800-w800-h600" alt="Besseggen-rug">
+        <div class="meta"><h3>Besseggen</h3><div class="sub">De beroemdste bergkam van Noorwegen, tussen turquoise en diepblauw water.</div><div class="nums"><span><b>14</b> km</span><span><b>6–9</b> u</span><span><b>pittig</b></span></div></div>
+      </article>
+      <article class="topper reveal d1">
+        <span class="rank">MUST · 02</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOSSmf2G_jGyR2rM92WHv7DFBC42zB34XNNK0XYX7571Ygs54GqX7w7-xAjHtyD7oXf_uT5Yebkd3VGQa5Rp51h3FVZpOz5Y6lb_J4ajTS5n_gSnRXBK2gir_ospU4vfCUm73H_PPCFN4k9FQ=s4800-w800-h600" alt="Galdhøpiggen">
+        <div class="meta"><h3>Galdhøpiggen</h3><div class="sub">2.469 m — de hoogste van Scandinavië. Zonder gletsjer beklimbaar vanaf Spiterstulen.</div><div class="nums"><span><b>~14</b> km</span><span><b>8–10</b> u</span><span><b>zwaar</b></span></div></div>
+      </article>
+      <article class="topper reveal d2">
+        <span class="rank">MUST · 03</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZPnr6C7-fQ37VRaEolyddg6y1Frc9JqpPny0JZg4s49eghpf_c-S4SDC5yBQHCGX3OlmYkMKiqSedp9j9xv4xerx5WLlGH-4hN_VXWyjHdXN51FybdHHuXCU7jfVHgbnOuYyc1N1YK2MWsPkCE=s4800-w800-h600" alt="Romsdalseggen">
+        <div class="meta"><h3>Romsdalseggen</h3><div class="sub">Vaak verkozen tot mooiste hike ter wereld, met uitzicht op de Trollveggen.</div><div class="nums"><span><b>10</b> km</span><span><b>5–8</b> u</span><span><b>pittig</b></span></div></div>
+      </article>
+      <article class="topper reveal">
+        <span class="rank">TROLLSTIGEN</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZPnUxzlSM4LJIHKrhopPivJwFPAoUDpvlJnyj3DwO63bEFRt06PX_XUy4-myc0LjzW1xoTurGG06dlb9TdL_OqqJRir7Abt04pSB1Iri-D7AFoFxDaauMPIEYipc8Gnc9jre3k3IXOBgdJKiQ=s4800-w800-h600" alt="Trollstigen">
+        <div class="meta"><h3>Trollstigen</h3><div class="sub">Serpentineweg met 11 haarspeldbochten boven de Stigfossen-waterval.</div><div class="nums"><span><b>uitzicht</b></span><span><b>open '26</b></span></div></div>
+      </article>
+      <article class="topper reveal d1">
+        <span class="rank">ALT · FJORD</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOzGGgkFTTA_MEda0i-UjST9zn-4LXJ2auXyVRUS1Es4vZ3Sq4Bd15GiHL4ZKp8iQYLXidQG12xRPK5nyYy7bfXWOcLWa8YCFdqWXcgEvGxwot7fmEu7-WDPk9CCWU0jxk56cvlSDAu77_07qg=s4800-w800-h600" alt="Trolltunga">
+        <div class="meta"><h3>Trolltunga</h3><div class="sub">De bucketlist-rots. Kampeer boven en pak 'm zonder de fotorij. (Optie A)</div><div class="nums"><span><b>20+</b> km</span><span><b>7–12</b> u</span><span><b>zeer zwaar</b></span></div></div>
+      </article>
+      <article class="topper reveal d2">
+        <span class="rank">ALT · NOORD</span>
+        <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOxXa4eUcXjU693w8Rtj2TX60ilPe6v1cN8Bkpaaw6i588NKSJ_eI-EafaLDNBBz8O4pohYMZb38AYZVlh_tRagUfJ4fXX5kFcwO56zD8XvV2UuigneVbTzHU2LtIDfrBrq_Kl_o-iTgvDvRQ=s4800-w800-h600" alt="Fjorden">
+        <div class="meta"><h3>Lofoten</h3><div class="sub">Reinebringen &amp; middernachtzon in het hoge noorden. Spectaculair maar ver. (Optie C)</div><div class="nums"><span><b>arctisch</b></span><span><b>2000 trappen</b></span></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section id="plan">
+  <div class="wrap">
+    <div class="plan-head">
+      <div>
+        <div class="reveal"><div class="eyebrow">03 — Het aanbevolen plan</div></div>
+        <div class="reveal d1"><h2 class="sec">Oslo → Jotunheimen → <em>Romsdalen</em></h2></div>
+      </div>
+      <div class="reveal d2"><span class="badge-rec">● Aanbevolen route</span></div>
+    </div>
+    <p class="lead reveal d2">Het minst gehaaste én voordeligste plan, volledig met trein, bus en hike-shuttles te doen — geen huurauto nodig. Drie nachten Oslo, dan dieper de bergen in met overnachtingen bij Gjendesheim en Spiterstulen. <span style="color:var(--aurora)">Groen = bergdag · </span><span style="color:var(--amber)">amber = stadsnacht.</span></p>
+
+    <div class="timeline">
+
+      <!-- DAG 1 -->
+      <div class="day night reveal">
+        <div class="day__num"><small>DAG</small><b>01</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZP8ugxFGmyhDj5s_YsEcOApJ4xwBK6xKalUEYXuM1E1KGMSgRUgdpggsQiRrtlzQzggGlO2wpaFSq14UnlJmLUzWsrVknwN6P6d4o0g5aMOm3XOBZWr9o-4Dda53KRYNY8aWXYXAiRS-sxIUgQ=s4800-w800-h600" alt="Oslo"><span class="geo">59.91°N · 10.75°E</span></div>
+          <div class="day__body">
+            <div class="day__route">Amsterdam → Oslo · vlucht ~1u45</div>
+            <h3>Landen &amp; inchecken in Grünerløkka</h3>
+            <p>Vlieg 's ochtends vanaf Schiphol, sta rond het middaguur in Oslo. Boek een hostel of appartement in of bij Grünerløkka — hét jonge, hippe stadsdeel. Rustige eerste avond: eten in foodhal Mathallen, een rondje langs Olaf Ryes plass en de eerste biertjes. Sla morgen je voorgloei-voorraad in bij Vinmonopolet (sluit doordeweeks om 18:00).</p>
+            <div class="chips"><span class="chip stay night">⌂ Oslo · stadsverblijf</span><span class="chip">KLM / SAS / Norwegian</span><span class="chip">retour ~€210–245</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 2 -->
+      <div class="day night reveal">
+        <div class="day__num"><small>DAG</small><b>02</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZNN44h8D7U5PR0E33j1QYkMNfKASszWqBQF4SeqW5O-9qeTklOMCr0ujVQI-GY-JEWxT0UiaxSAOFEEce-tq1FU80fnuulspvzvX3ZrVxk0ei3HJFBUc8e_ywu7bO8LTGsXkAph-Vi33Tu-JEc=s4800-w800-h600" alt="Oslo Operahuset"><span class="geo">OSLO · dag + nacht</span></div>
+          <div class="day__body">
+            <div class="day__route">Oslo · cultuur overdag, club 's nachts</div>
+            <h3>Daken, fjordzwemmen &amp; eerste echte stapavond</h3>
+            <p>Overdag: loop het marmeren dak van het Operahuis op, het Vigelandpark, en duik in de Oslofjord bij een van de drijvende sauna's aan Bjørvika. 's Avonds begin je in Grünerløkka (Blå voor livemuziek + club, microbrouwerij Schous) en zak je later af naar Youngstorget voor techno (Jæger, The Villa) en het meerlaagse Kulturhuset. Bars lopen vol rond middernacht, clubs rond 01:00.</p>
+            <div class="chips"><span class="chip stay night">⌂ Oslo · stadsverblijf</span><span class="chip">Grünerløkka + Youngstorget</span><span class="chip">paspoort mee — deurleeftijd vaak 20+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 3 -->
+      <div class="day night reveal">
+        <div class="day__num"><small>DAG</small><b>03</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZM36E5B6K8NcVdT2Q1_lFDpVKi4NsI1NuC4DEDSCziiEK1tfABUtGVCHHa7oF9Abvwcx2ks2jbStnwqjTihe7rA3oTRo-otQICprtq_ZkPNkafCenHSUm9IV8bEwB9kcvv_0fyWqEo8EKtK4yI=s4800-w800-h600" alt="Oslo"><span class="geo">OSLO · laatste nacht</span></div>
+          <div class="day__body">
+            <div class="day__route">Oslo · afsluiter</div>
+            <h3>Musea, markten en de laatste keer los</h3>
+            <p>Bygdøy-musea (Fram-poolschip, Kon-Tiki) of het beeldenpark Ekebergparken met uitzicht over de stad. Slenter de vintage-winkels van Grünerløkka af. Laatste avond stevig uit — geniet ervan, want de drank is hier flink prijzig (een biertje in de kroeg al gauw €9–12). Pak vroeg je rugzak in: morgen ruil je de stad voor de bergen.</p>
+            <div class="chips"><span class="chip stay night">⌂ Oslo · stadsverblijf</span><span class="chip">Vinmonopolet vóór 18:00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 4 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>04</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZN2JihC39Mht4iLjALdEtFkqQGckM5XagQL1P-eLKwcw0Nuygi2jyBuV0ynaCWqng6ZDrdIgIBkOkJPuZ4jEVgjfm4RmgY7ov1itcQUAI8QmUxBfecGvqy6otsVEhRxhjBonj6qTDGe-WFI=s4800-w800-h600" alt="Gjende-meer"><span class="geo">61.50°N · 8.77°E</span></div>
+          <div class="day__body">
+            <div class="day__route">Oslo → Gjendesheim · bus ~5u</div>
+            <h3>Naar het turquoise Gjende-meer</h3>
+            <p>Met de Valdresekspressen-bus vanaf Oslo Busterminal dwars door Valdres naar Gjendesheim — de bus stopt op een paar meter van de hut. Je eerste bergovernachting: slaap in de bemande DNT-lodge of zet je tent op het grasveld. Maak 's avonds een wandeling langs het gletsjermeel-turquoise meer en geniet van de stilte na drie nachten stad.</p>
+            <div class="chips"><span class="chip stay">⛺ Gjendesheim · berghut / kamp</span><span class="chip">Valdresekspressen ~NOK 1000 retour</span><span class="chip">eerste bergnacht</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 5 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>05</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZMvyMXwbHyWc1MvarN4G1JAWLHK4-jYjJX1GaUiKyS3DvYKum6qlcYJ6ptWaN5RHoTXnFJcJp-hkJwkAT-cTU0-baqN8seQt16NKOp67V7QIkTe-ms6Uu9W2wBs64xqd4676lrTXbw5fq_mqg=s4800-w800-h600" alt="Besseggen"><span class="geo">BESSEGGEN · 1743 m</span></div>
+          <div class="day__body">
+            <div class="day__route">Besseggen-rug · 14 km · 6–9 u</div>
+            <h3>De beroemdste bergkam van het land</h3>
+            <p>Pak de vroege boot over het Gjende-meer naar Memurubu en hike terug over de rug — zo zit je niet vast aan een retourboot. Links het turquoise Gjende, rechts het diepblauwe Bessvatn, 400 meter lager. Smal en luchtig, maar geen klimtechniek. <strong>Boek de Gjende-boot vooraf</strong>, in juli–augustus is hij vaak vol. Tweede nacht in Gjendesheim.</p>
+            <div class="chips"><span class="chip stay">⛺ Gjendesheim · berghut / kamp</span><span class="chip">boot Gjende → Memurubu</span><span class="chip hard">hoogtevrees? let op de rug</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 6 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>06</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZODGxrgfxAXu51H3_PvwYa1SCwvJBcxAWdC1PbcBSCljgImkVu57G0iiqy0usqM8qco5RmNTIY7KkDHVd87Mg-ipn58FD6OcGgUc3CIJ7z6rpi_i7Eo98yTiLw14LGlrLYuPcoy21ChFaRj8Eg=s4800-w800-h600" alt="Spiterstulen"><span class="geo">SPITERSTULEN · 1106 m</span></div>
+          <div class="day__body">
+            <div class="day__route">Gjendesheim → Lom → Spiterstulen</div>
+            <h3>Transfer naar de voet van de reus</h3>
+            <p>Reisdag dieper Jotunheimen in: via Lom naar Spiterstulen, een berglodge precies aan de start van Galdhøpiggen. Goede, stevige bergmaaltijden en een kampeerveld als je je tent verkiest. Tweede bergovernachting. Doe een korte verkenning door het ruige Visdalen om de benen los te houden — morgen is de grote beklimming.</p>
+            <div class="chips"><span class="chip stay">⛺ Spiterstulen · lodge / kamp</span><span class="chip">bus Lom → Spiterstulen (zomer)</span><span class="chip">tweede bergnacht</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 7 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>07</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOSSmf2G_jGyR2rM92WHv7DFBC42zB34XNNK0XYX7571Ygs54GqX7w7-xAjHtyD7oXf_uT5Yebkd3VGQa5Rp51h3FVZpOz5Y6lb_J4ajTS5n_gSnRXBK2gir_ospU4vfCUm73H_PPCFN4k9FQ=s4800-w800-h600" alt="Galdhøpiggen"><span class="geo">GALDHØPIGGEN · 2469 m</span></div>
+          <div class="day__body">
+            <div class="day__route">Galdhøpiggen · 8–10 u · dak van Scandinavië</div>
+            <h3>De grote beklimming</h3>
+            <p>Vanaf Spiterstulen klim je zonder gletsjer of gids naar de hoogste piek van Noord-Europa (2.469 m). Onderweg pak je drie 2000m-toppen mee. Het is fysiek zwaar maar technisch behapbaar voor fitte lopers. Boven staat een hut met warme chocomel. Neem warme kleren mee — het weer slaat hier in minuten om. 's Avonds terug naar de lodge: dik verdiend.</p>
+            <div class="chips"><span class="chip stay">⛺ Spiterstulen · lodge / kamp</span><span class="chip">geen gletsjer = geen gids</span><span class="chip hard">~1400 hoogtemeters</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 8 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>08</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZPnr6C7-fQ37VRaEolyddg6y1Frc9JqpPny0JZg4s49eghpf_c-S4SDC5yBQHCGX3OlmYkMKiqSedp9j9xv4xerx5WLlGH-4hN_VXWyjHdXN51FybdHHuXCU7jfVHgbnOuYyc1N1YK2MWsPkCE=s4800-w800-h600" alt="Romsdalen"><span class="geo">RAUMA-SPOORLIJN → ÅNDALSNES</span></div>
+          <div class="day__body">
+            <div class="day__route">Jotunheimen → Dombås → Åndalsnes</div>
+            <h3>Over de mooiste spoorlijn van Europa</h3>
+            <p>Transfer via Lom/Dombås en stap dan op de <strong>Rauma-spoorlijn</strong> — herhaaldelijk verkozen tot mooiste treinrit van Europa, langs de 1000 meter hoge Trollveggen-wand. Aankomst in het gezellige bergstadje Åndalsnes aan de Romsdalsfjord. Rustige avond, lekker eten, vroeg je bed in voor de slotklim morgen.</p>
+            <div class="chips"><span class="chip stay">⌂ Åndalsnes · pension / camping</span><span class="chip">Rauma-spoorlijn ~1,5 u</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 9 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>09</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZME5p4wv9FcD-7E3_YZo3kypmIJ_Id9a_lhKE4j1vwPU-C2CYKGfxT-8XvSQGP1zZH-2U-5DgY_bIZ7OYKfXhGHR3sgNxdKla54tazYJZWDnJKj8ZZ_VzEFUaN4-tJgwBK1af6qp6DKsi34MQ=s4800-w800-h600" alt="Romsdalseggen"><span class="geo">ROMSDALSEGGEN · 1216 m</span></div>
+          <div class="day__body">
+            <div class="day__route">Romsdalseggen-rug · 10 km · 5–8 u</div>
+            <h3>De finale: een rug om nooit te vergeten</h3>
+            <p>Shuttle vanaf Åndalsnes naar Vengedalen en hike terug naar het stadje over een van de mooiste bergruggen ter wereld. Exposé met kettingen op de scherpste stukken, eindeloze uitzichten op de fjord en de Trollveggen, en een finish bij het uitkijkplatform Rampestreken (of neem de Romsdalsgondolen naar beneden om je knieën te sparen). 's Middags tijd voor de Trollstigen-bergweg.</p>
+            <div class="chips"><span class="chip">shuttle naar Vengedalen</span><span class="chip">finish bij Rampestreken</span><span class="chip hard">exposé + kettingen</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAG 10 -->
+      <div class="day reveal">
+        <div class="day__num"><small>DAG</small><b>10</b></div>
+        <div class="day__card">
+          <div class="day__media"><img src="https://lh3.googleusercontent.com/place-photos/AJRVUZPnUxzlSM4LJIHKrhopPivJwFPAoUDpvlJnyj3DwO63bEFRt06PX_XUy4-myc0LjzW1xoTurGG06dlb9TdL_OqqJRir7Abt04pSB1Iri-D7AFoFxDaauMPIEYipc8Gnc9jre3k3IXOBgdJKiQ=s4800-w800-h600" alt="Trollstigen"><span class="geo">TROLLSTIGEN · 858 m</span></div>
+          <div class="day__body">
+            <div class="day__route">Åndalsnes → Ålesund / Oslo → Amsterdam</div>
+            <h3>Trollstigen en naar huis</h3>
+            <p>Als de tijd het toelaat: 's ochtends nog even de Trollstigen-serpentine met z'n 11 haarspeldbochten en uitkijkplatforms boven de Stigfossen-waterval (open seizoen 2026 bevestigd, in 2026 zelfs recordvroeg geopend op 27 april). Daarna een directe vlucht vanaf Ålesund (~1u45 rijden) terug naar Amsterdam, of de trein terug naar Oslo. Buffer inplannen — Noorse afstanden en veerboten kosten tijd.</p>
+            <div class="chips"><span class="chip">vlucht Ålesund → AMS</span><span class="chip">of trein → Oslo</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- KAART -->
+<section id="kaart" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">04 — Het terrein</div></div>
+    <div class="reveal d1"><h2 class="sec">Satelliet over de <em>speeltuin</em>.</h2></div>
+    <p class="lead reveal d2">Twee bergmassieven, één lijn van zuidoost naar noordwest. Links Jotunheimen rond het Gjende-meer (Besseggen + Galdhøpiggen), rechts Romsdalen bij Åndalsnes (Romsdalseggen + Trollstigen). Zoom in op de satellietbeelden om het reliëf te zien waar je doorheen loopt.</p>
+
+    <div class="split" style="margin-top:46px">
+      <div class="mapwrap map-tall reveal">
+        <span class="map-label">JOTUNHEIMEN · GJENDE · GALDHØPIGGEN</span>
+        <iframe loading="lazy" src="https://maps.google.com/maps?q=61.55,8.55&z=10&t=k&hl=nl&output=embed" title="Jotunheimen satelliet"></iframe>
+      </div>
+      <div class="reveal d1">
+        <h3 class="disp" style="font-size:1.6rem;margin-bottom:12px;color:var(--aurora)">Jotunheimen — het 'huis van de reuzen'</h3>
+        <p style="color:var(--ink-soft);font-size:.95rem">Noorwegens hoogste nationale park, met meer dan 250 toppen boven de 1900 m. Hier liggen Besseggen en Galdhøpiggen, met het gletsjermeel-turquoise Gjende-meer als middelpunt. De bemande DNT-lodges Gjendesheim, Memurubu en Spiterstulen vormen je bergbasissen — slaap in een echt bed of zet je tent ernaast.</p>
+      </div>
+    </div>
+
+    <div class="split" style="margin-top:34px">
+      <div class="reveal d1" style="order:2">
+        <h3 class="disp" style="font-size:1.6rem;margin-bottom:12px;color:var(--ice)">Romsdalen — fjord, rug en de Trollveggen</h3>
+        <p style="color:var(--ink-soft);font-size:.95rem">Vanaf het bergstadje Åndalsnes lopen de Romsdalseggen-rug en kijk je uit op de Trollveggen, met 1000 m de hoogste verticale rotswand van Europa. De Trollstigen-serpentine kronkelt vanaf hier de bergen in. Bereikbaar via de adembenemende Rauma-spoorlijn — geen auto nodig.</p>
+      </div>
+      <div class="mapwrap map-tall reveal" style="order:1">
+        <span class="map-label">ROMSDALEN · ÅNDALSNES · TROLLSTIGEN</span>
+        <iframe loading="lazy" src="https://maps.google.com/maps?q=62.49,7.72&z=11&t=k&hl=nl&output=embed" title="Romsdalen satelliet"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRAKTISCH -->
+<section id="praktisch">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">05 — Praktisch</div></div>
+    <div class="reveal d1"><h2 class="sec">Alles wat je <em>echt</em> moet weten.</h2></div>
+    <p class="lead reveal d2">Vervoer, bergslapen, budget en de spelregels van het Noorse nachtleven. Lees dit vóór je boekt.</p>
+
+    <div class="prac">
+      <div class="pcard reveal">
+        <div class="ico">Vervoer · vliegen &amp; trein</div>
+        <h4>Hoe je je verplaatst</h4>
+        <ul>
+          <li><b>Amsterdam → Oslo</b> direct in ~1u45 (KLM/SAS/Norwegian), retour grofweg €210–245 bij vroeg boeken. Terug eventueel vanaf <b>Ålesund</b> (ook direct op AMS).</li>
+          <li><b>Valdresekspressen</b>-bus Oslo → Gjendesheim, ~5 uur, stopt bij de hut. Reken op ~NOK 1000 retour.</li>
+          <li><b>Rauma-spoorlijn</b> Dombås → Åndalsnes (~1,5 u): een van de mooiste treinritten van Europa.</li>
+          <li><b>Gjende-boot</b> (Gjendesheim ↔ Memurubu): ±NOK 260 enkel / 300 retour. Seizoen ~6 juni–19 sept. <b>Vooraf boeken!</b></li>
+          <li>Voor 4 personen is autovrij hier prima te doen — goedkoper en geen gedoe met tol en veerboten.</li>
+        </ul>
+      </div>
+
+      <div class="pcard reveal d1">
+        <div class="ico">Slapen op de berg</div>
+        <h4>Hutten, lodges &amp; vrij kamperen</h4>
+        <ul>
+          <li><b>Allemansrett</b>: vrij kamperen mag op onbebouwd terrein, minimaal 150 m van huizen, en je laat geen sporen na. Gratis. Net als bij Trolltunga.</li>
+          <li><b>DNT-hutten/lodges</b>: bemande lodges met maaltijden ~NOK 280–500/bed (lid). Slaapzaklaken verplicht (of huur ~NOK 120).</li>
+          <li><b>DNT-jeugdlidmaatschap</b> (13–25 jr): ±NOK 365 voor 2026 — verdient zich na een paar hutnachten al terug, plus korting op bedden.</li>
+          <li>Open vuur is verboden tussen 15 april en 15 september — neem dus een brander mee.</li>
+        </ul>
+      </div>
+
+      <div class="pcard night reveal">
+        <div class="ico">Nachtleven · de spelregels</div>
+        <h4>Uitgaan in Oslo</h4>
+        <ul>
+          <li><b>Leeftijd</b>: 18 voor bier/wijn, 20 voor sterk; clubs hanteren vaak een deurbeleid van 20–21+. Op jullie 23e zit je goed — paspoort mee.</li>
+          <li><b>Vinmonopolet</b> is de enige plek voor drank boven 4,7%. Open ~10–18 doordeweeks, tot 16 op zaterdag, dicht op zondag. Supermarkten verkopen alleen licht bier/cider tot 20:00.</li>
+          <li><b>Forspiel</b> (voorgloeien) is dé norm — een biertje in de kroeg kost al snel €9–12, dus drink eerst thuis.</li>
+          <li>Bars vol rond middernacht, clubs pieken rond 01:00 en sluiten om 03:00 (rest van het land 02:00).</li>
+          <li><b>Buurten</b>: Grünerløkka (bohemien, livemuziek) en Youngstorget/Torggata (techno-clubs).</li>
+        </ul>
+      </div>
+
+      <div class="pcard reveal d1">
+        <div class="ico">Budget &amp; uitrusting</div>
+        <h4>Geld en gear</h4>
+        <ul>
+          <li><b>Noorwegen is duur.</b> Grootste besparing: zelf koken uit de supermarkt (restaurant-hoofdgerecht NOK 200–350). Hostels/budgetkamers ~NOK 800–1200.</li>
+          <li><b>Uitrusting</b>: lichte 2–3-persoonstent, slaapzak voor rond 0 °C (zelfs in de zomer ligt er sneeuw op hoogte), goede bergschoenen, complete regenkleding.</li>
+          <li>Kaart + kompas, hoofdlamp, en genoeg eten/water. Beken zijn drinkbaar in de hoge bergen.</li>
+          <li><b>Seizoen</b>: juli–augustus is sneeuwvrij en ideaal. Besseggen houdt soms sneeuw tot half juni; check altijd <b>yr.no</b> vóór elke hike.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALTERNATIEVEN -->
+<section id="alternatieven" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow amber">06 — Twee alternatieven</div></div>
+    <div class="reveal d1"><h2 class="sec">Liever de <em>iconen</em> of het hoge noorden?</h2></div>
+    <p class="lead reveal d2">Het aanbevolen plan is het meest gebalanceerd, maar deze twee zijn even uitgewerkt voor het geval jullie iets anders willen. Optie A draait om de wereldberoemde fjordrotsen; optie C is de ambitieuze arctische variant.</p>
+
+    <div class="alts">
+      <!-- OPTIE A -->
+      <article class="alt reveal">
+        <div class="alt__imgs">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOUkZ5hfYMdElx11QRkGlw7qiPOy1kS3JfJmOi16js1j1cRFFz-wWMCVmciZITm-A5XOjv0d5GzrXeDewPEXySrqd498woIR7G8oSDyXBDxPzBcw5OyIfNFZ2THBjO9D5dFCY51FsZYQPPM1w=s4800-w800-h600" alt="Preikestolen">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOzGGgkFTTA_MEda0i-UjST9zn-4LXJ2auXyVRUS1Es4vZ3Sq4Bd15GiHL4ZKp8iQYLXidQG12xRPK5nyYy7bfXWOcLWa8YCFdqWXcgEvGxwot7fmEu7-WDPk9CCWU0jxk56cvlSDAu77_07qg=s4800-w800-h600" alt="Trolltunga">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZMcA5b5pVhgrKESV7FC67Jzi0icqPE2sIbKzCPuPN98MVfO_VztKurgpjlFHLKEnMjXGEmGbpqAc5rOtcXcZ5BcY5prKwplG5QDHXtCXNAKgdgW4vBtsSPyy6PPLWYAHLpkc4z1Zq9fzbatsodMTkkbag=s4800-w800-h600" alt="Bergen">
+        </div>
+        <div class="alt__body">
+          <div class="alt__tag">Optie A · de fjordiconen</div>
+          <h3>Stavanger → Trolltunga → <em>Bergen</em></h3>
+          <p>De drie wereldberoemde rotsen — Preikestolen, Kjeragbolten en Trolltunga — met kamperen op de top van Trolltunga, plus drie stapavonden in Bergen. Huurauto nodig.</p>
+          <ul class="alt__list">
+            <li><span>DAG 1–3</span> Stavanger + Preikestolen (wildkamp) + Kjeragbolten</li>
+            <li><span>DAG 4–5</span> Trolltunga — kamperen boven op de berg</li>
+            <li><span>DAG 6</span> Hardangerfjord &amp; Vøringsfossen → Bergen</li>
+            <li><span>DAG 7–9</span> Bergen nachtleven + Nærøyfjord-cruise &amp; Stegastein</li>
+            <li><span>DAG 10</span> Vlucht Bergen → Amsterdam</li>
+          </ul>
+          <div class="verdict">Kies dit als de <b>iconische fjordfoto's</b> onmisbaar zijn. Nadeel: Bergens scene is kleiner dan Oslo, je hebt een auto nodig en de westkust is natter.</div>
+        </div>
+      </article>
+
+      <!-- OPTIE C -->
+      <article class="alt reveal d1">
+        <div class="alt__imgs">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZOxXa4eUcXjU693w8Rtj2TX60ilPe6v1cN8Bkpaaw6i588NKSJ_eI-EafaLDNBBz8O4pohYMZb38AYZVlh_tRagUfJ4fXX5kFcwO56zD8XvV2UuigneVbTzHU2LtIDfrBrq_Kl_o-iTgvDvRQ=s4800-w800-h600" alt="Lofoten">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZMmdrbtwhqJ2rwcCLKN-YtPYRnXd2LGccGuV9LdAxI5pMyQDCAOYyhAgSvnc8ueY97M0YnNGjBj67qKRpiCu4Evq8Y_HlB-FcKm8g38L_oBdcOsBXKE4kegmanDVKJk3P0dg1PlJHrY24_VBc0=s4800-w800-h600" alt="Fjord noord">
+          <img src="https://lh3.googleusercontent.com/place-photos/AJRVUZM88B8th8ULRZkyLhaec4MLtGcohV9Owb-fHn-t7skD5v3wv8kIX6O129QiUIyncFYvR_J55xaxynXnURheB9F_ohaw2JgkjjqCZ9yxuNS3L2R_fSWPUvedhCiHssLH6OVkU1MJPSZ2X-TDDA=s4800-w800-h600" alt="Waterval">
+        </div>
+        <div class="alt__body">
+          <div class="alt__tag">Optie C · het arctische noorden</div>
+          <h3>Lofoten &amp; <em>middernachtzon</em></h3>
+          <p>De wildste variant: arctische pieken, middernachtzon en kamperen onder een hemel die nooit donker wordt, met Tromsø voor het nachtleven. Veel vliegen — kies noord óf zuid, niet allebei.</p>
+          <ul class="alt__list">
+            <li><span>DAG 1–3</span> Tromsø — pubs &amp; middernachtzon</li>
+            <li><span>DAG 4</span> Vlucht/veerboot naar Lofoten</li>
+            <li><span>DAG 5–8</span> Reinebringen, Kvalvika/Ryten, Festvågtind + wildkamp</li>
+            <li><span>DAG 9–10</span> Terug via Bodø → Amsterdam</li>
+          </ul>
+          <div class="verdict">Kies dit alleen als <b>middernachtzon &amp; arctische drama</b> belangrijker zijn dan de zuidelijke iconen. Nadeel: de meeste reistijd en vluchten van alle opties.</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="mapwrap map-tall reveal" style="margin-top:24px;aspect-ratio:21/9">
+      <span class="map-label">OPTIE C · LOFOTEN · 67.9°N — middernachtzon</span>
+      <iframe loading="lazy" src="https://maps.google.com/maps?q=67.95,13.1&z=9&t=k&hl=nl&output=embed" title="Lofoten satelliet"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- BOEKEN -->
+<section id="boeken">
+  <div class="wrap" style="padding-bottom:clamp(40px,6vh,70px)">
+    <div class="reveal"><div class="eyebrow">07 — Aan de slag</div></div>
+    <div class="reveal d1"><h2 class="sec">Wat je <em>nu</em> al kunt vastleggen.</h2></div>
+
+    <div class="check reveal d1">
+      <h3 class="disp">Boek-checklist</h3>
+      <p style="color:var(--ink-soft);max-width:60ch">In het hoogseizoen (juli–aug) raken bedden en boten snel vol. Dit als eerste vastzetten zodra jullie de data prikken:</p>
+      <div class="clist">
+        <div><span class="b">✓</span><div><b>Retourvlucht AMS → Oslo</b> (eventueel terug vanaf Ålesund) — ~2–3 maanden vooruit voor de beste prijs.</div></div>
+        <div><span class="b">✓</span><div><b>Gjende-boot</b> Gjendesheim ↔ Memurubu — vooraf, want vol in piekseizoen.</div></div>
+        <div><span class="b">✓</span><div><b>DNT-bedden</b> in Gjendesheim &amp; Spiterstulen (of plan je wildkampeerstek).</div></div>
+        <div><span class="b">✓</span><div><b>DNT-jeugdlidmaatschap</b> (~NOK 365) — voor korting op hutten.</div></div>
+        <div><span class="b">✓</span><div><b>Stadsverblijf Oslo</b> in/bij Grünerløkka, 3 nachten.</div></div>
+        <div><span class="b">✓</span><div><b>Bus- &amp; treintickets</b> (Valdresekspressen, Rauma-spoorlijn) zodra de route staat.</div></div>
+      </div>
+    </div>
+
+    <p class="note reveal">
+      <strong>Let op:</strong> vlucht-, trein- en busprijzen zijn dynamisch — bovenstaande bedragen zijn richtprijzen bij vroeg boeken. Hoge bergwegen en -hikes zijn weersafhankelijk: Trollstigen draait een normaal seizoen in 2026 maar kan bij hevige regen kort sluiten; Besseggen kan tot half juni sneeuw houden; op Galdhøpiggen ligt ook 's zomers sneeuw. Check vóór elke etappe yr.no, de Vegvesen-app en de actuele pagina's van de vervoerders. Bevestig exacte 2026-tijden en -prijzen op nor-way.no, vy.no en gjende.no.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <span class="disp">Klaar voor de bergen.</span>
+  Noorwegen · 10 dagen · 3 nachten stad + 7 dagen bergen — voor 4 vrienden, zomer 2026.<br>
+  Samengesteld met actuele reisinfo · foto's via Google Places · satellietbeelden via Google Maps.
+</footer>
+
+<script>
+  // progress bar + nav solidify
+  const prog=document.getElementById('progress'), nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    prog.style.width=(h.scrollTop/max*100)+'%';
+    nav.classList.toggle('solid',h.scrollTop>40);
+  },{passive:true});
+
+  // mobile menu
+  const tgl=document.getElementById('navToggle'), links=document.getElementById('navLinks');
+  tgl.addEventListener('click',()=>links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));
+
+  // reveal on scroll
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // subtle hero parallax
+  const heroBg=document.querySelector('.hero__bg');
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY;
+    if(y<window.innerHeight){heroBg.style.transform='scale(1.08) translateY('+(y*0.18)+'px)';}
+  },{passive:true});
+</script>
+</body>
+</html>
