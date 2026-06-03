@@ -12,7 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root{
-    --bg:#05080b; --ink:#eef4f7; --ink-soft:#aeb9c2; --ink-dim:#76828c;
+    --bg:#05080b; --ink:#eef4f7; --ink-soft:#c6cfd6; --ink-dim:#9aa6b0;
     --aurora:#79ecae; --aurora-deep:#33c98f; --ice:#74d2ec;
     --amber:#ffbd7a; --amber-deep:#ff9a55; --magenta:#ef86bb;
     --glass-line:rgba(255,255,255,.14);
@@ -22,6 +22,7 @@
     --ease-in-out:cubic-bezier(0.4,0,0.2,1);   /* neutrale beweging */
     --ease-back:cubic-bezier(0.34,1.56,0.64,1);/* één signatuur-overshoot */
     --dur-micro:170ms; --dur-base:320ms; --dur-slow:540ms;
+    --text-sh:0 1px 2px rgba(0,0,0,.6);   /* tight mini-shadow: legible on light & dark, no glow */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth;scroll-snap-type:y proximity}
@@ -65,30 +66,48 @@
   #flymap{position:fixed;inset:0;z-index:-2;opacity:0;pointer-events:none;background:#05080b;filter:saturate(1.08) contrast(1.04) brightness(.9)}
   #flymap .leaflet-control-attribution{font-size:9px;background:rgba(0,0,0,.45);color:#9aa6b0}
   #flymap .leaflet-control-attribution a{color:#bcd}
-  #flyname{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;padding:8px 15px;border-radius:100px;white-space:nowrap;background:rgba(5,8,11,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-line);color:var(--ice);opacity:0;transition:opacity .5s ease;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  #flyname{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;padding:9px 16px;border-radius:100px;white-space:nowrap;background:rgba(8,12,17,.42);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);border:1px solid var(--glass-line);color:#e4ebf0;opacity:0;transition:opacity .5s ease;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.35);text-shadow:var(--text-sh)}
   #flyname b{color:var(--aurora)}
   #globe canvas{display:block}
   #map-vignette{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity var(--dur-base) var(--ease-out);background:radial-gradient(105% 95% at 50% 46%,transparent 38%,rgba(5,8,11,.18) 66%,rgba(5,8,11,.6) 100%)}
 
-  /* ---- preloader: the first three seconds ---- */
+  /* ---- start screen: slide-to-begin (assets warm up behind it) ---- */
   #preloader{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 90% at 50% 38%,#0a131c,#05080b 72%);transition:opacity .9s var(--ease-out),visibility .9s}
+    background:radial-gradient(100% 78% at 50% 32%,rgba(51,201,143,.12),transparent 56%),radial-gradient(120% 92% at 50% 42%,#0a131c,#05080b 74%);
+    transition:opacity .9s var(--ease-out),visibility .9s}
   #preloader.done{opacity:0;visibility:hidden}
-  .pl-inner{display:flex;flex-direction:column;align-items:center;gap:13px;transition:transform .9s var(--ease-out)}
+  .pl-inner{display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 22px;text-align:center;transition:transform .9s var(--ease-out)}
   #preloader.done .pl-inner{transform:translateY(-14px)}
-  .pl-ring{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.12);border-top-color:var(--aurora);
-    animation:plspin .9s linear infinite;box-shadow:0 0 26px rgba(121,236,174,.25)}
-  @keyframes plspin{to{transform:rotate(360deg)}}
-  .pl-co{font-size:.6rem;letter-spacing:.24em;color:var(--ice);opacity:.72;margin-top:8px}
-  .pl-title{font-size:clamp(1.9rem,6vw,2.7rem);font-weight:900;letter-spacing:-.01em;color:var(--ink)}
-  .pl-sub{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim)}
+  .pl-co{font-size:.6rem;letter-spacing:.22em;color:var(--ice);opacity:.75}
+  .pl-title{font-size:clamp(2.4rem,9vw,4rem);font-weight:900;letter-spacing:-.02em;color:var(--ink);line-height:1;margin-top:2px}
+  .pl-sub{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-dim)}
+  .slider{position:relative;margin-top:32px;width:clamp(258px,82vw,360px);height:66px;border-radius:100px;
+    background:linear-gradient(135deg,rgba(255,255,255,.085),rgba(255,255,255,.03));
+    border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 44px rgba(0,0,0,.45);
+    overflow:hidden;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+  .slider:active{cursor:grabbing}
+  .slider-fill{position:absolute;left:0;top:0;bottom:0;width:62px;border-radius:100px;pointer-events:none;
+    background:linear-gradient(90deg,rgba(51,201,143,.30),rgba(121,236,174,.16))}
+  .slider-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-left:44px;
+    font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;pointer-events:none;
+    color:transparent;background:linear-gradient(90deg,#586470 32%,#eef4f7 50%,#586470 68%);background-size:230% 100%;
+    -webkit-background-clip:text;background-clip:text;animation:slideshimmer 2.8s linear infinite}
+  @keyframes slideshimmer{to{background-position:-230% 0}}
+  .slider-handle{position:absolute;left:5px;top:5px;width:56px;height:56px;border-radius:50%;border:none;
+    display:flex;align-items:center;justify-content:center;cursor:grab;color:#05230f;
+    background:radial-gradient(circle at 36% 30%,#c7ffe0,#79ecae 58%,#33c98f);
+    box-shadow:0 6px 22px rgba(121,236,174,.5),inset 0 1px 0 rgba(255,255,255,.65);touch-action:none}
+  .slider-handle:active{cursor:grabbing}
+  .slider.done .slider-text{opacity:0}
+  .pl-loading{margin-top:22px;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim);transition:color .4s var(--ease-out)}
+  .pl-loading.ready{color:var(--aurora)}
   .pl-dots::after{content:"";animation:pldots 1.5s steps(1,end) infinite}
   @keyframes pldots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}}
 
-  .glass{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.035));
+  .glass{background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
     backdrop-filter:blur(16px) saturate(175%);-webkit-backdrop-filter:blur(16px) saturate(175%);
     border:1px solid var(--glass-line);box-shadow:0 12px 42px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.26),inset 0 -1px 0 rgba(255,255,255,.05);
-    border-radius:24px;position:relative;overflow:hidden}
+    border-radius:24px;position:relative;overflow:hidden;text-shadow:var(--text-sh)}
   .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
     background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 42%)}
   .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
@@ -97,7 +116,7 @@
 
   nav{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:900;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;border-radius:100px;
     background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
-    border:1px solid var(--glass-line);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);max-width:calc(100vw - 24px)}
+    border:1px solid var(--glass-line);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);max-width:calc(100vw - 24px);text-shadow:var(--text-sh)}
   .brand{font-family:'Fraunces',serif;font-weight:900;font-size:.95rem;display:flex;align-items:center;gap:8px;padding-right:10px}
   .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--aurora);box-shadow:0 0 12px var(--aurora)}
   .nav-links{display:flex;gap:4px}
@@ -116,23 +135,25 @@
   .slide{min-height:100svh;display:flex;align-items:center;scroll-snap-align:start;position:relative}
   .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:120px clamp(18px,4vw,48px)}
   .flow{padding:clamp(56px,9vh,110px) clamp(18px,4vw,48px)}
-  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:18px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:18px;text-shadow:var(--text-sh)}
   .eyebrow.amber{color:var(--amber)}
-  h2.sec{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.0;letter-spacing:-.02em;max-width:17ch;text-shadow:0 2px 22px rgba(0,0,0,.6)}
+  h2.sec{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.0;letter-spacing:-.02em;max-width:17ch;text-shadow:var(--text-sh)}
   h2.sec em{font-style:italic;font-weight:500;color:var(--ice)}
-  .lead{max-width:60ch;margin-top:22px;color:#c8d1d8;font-size:clamp(1rem,1.4vw,1.16rem);text-shadow:0 1px 14px rgba(0,0,0,.8)}
+  .lead{max-width:60ch;margin-top:22px;color:#d2dade;font-size:clamp(1rem,1.4vw,1.16rem);text-shadow:var(--text-sh)}
+  #concept::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(100deg,rgba(5,8,11,.45) 0%,rgba(5,8,11,.2) 46%,transparent 72%)}
+  #concept .wrap{position:relative;z-index:1}
 
   #hero{position:relative;z-index:2;text-align:center;flex-direction:column;justify-content:center;overflow:hidden}
-  #hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(68% 58% at 50% 47%,rgba(4,7,10,.72),rgba(4,7,10,.34) 50%,transparent 74%)}
+  #hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(68% 58% at 50% 47%,rgba(4,7,10,.5),rgba(4,7,10,.22) 52%,transparent 76%)}
   .hero__bg-fallback{position:absolute;inset:0;opacity:0;z-index:-1;background:radial-gradient(60% 60% at 50% 40%,rgba(51,201,143,.25),transparent 70%),var(--bg)}
   .hero__inner{position:relative;z-index:2;padding:0 20px;opacity:0;transform:translateY(20px);animation:heroIn 1.4s cubic-bezier(.2,.7,.2,1) 3.4s forwards}
   @keyframes heroIn{to{opacity:1;transform:none}}
-  .kicker{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--aurora);margin-bottom:26px;text-shadow:0 1px 12px rgba(0,0,0,.8)}
+  .kicker{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--aurora);margin-bottom:26px;text-shadow:var(--text-sh)}
   .kicker::before,.kicker::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--aurora))}
   .kicker::after{background:linear-gradient(90deg,var(--aurora),transparent)}
-  #hero h1{font-family:'Fraunces',serif;font-weight:900;line-height:.9;font-size:clamp(3.2rem,13vw,9rem);letter-spacing:-.03em;text-shadow:0 2px 10px rgba(0,0,0,.7),0 10px 60px rgba(0,0,0,.75)}
+  #hero h1{font-family:'Fraunces',serif;font-weight:900;line-height:.9;font-size:clamp(3.2rem,13vw,9rem);letter-spacing:-.03em;text-shadow:0 2px 6px rgba(0,0,0,.45)}
   #hero h1 em{font-style:italic;font-weight:500;color:var(--ice)}
-  .hero__sub{max-width:540px;margin:24px auto 0;font-size:clamp(1rem,1.6vw,1.2rem);color:#d3dce3;text-shadow:0 1px 14px rgba(0,0,0,.8)}
+  .hero__sub{max-width:540px;margin:24px auto 0;font-size:clamp(1rem,1.6vw,1.2rem);color:#d9e0e6;text-shadow:var(--text-sh)}
   .hero__pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:32px}
   .pill{font-family:'Space Mono',monospace;font-size:.72rem;padding:9px 16px;border-radius:100px;background:rgba(255,255,255,.06);backdrop-filter:blur(14px);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
   .pill b{color:var(--aurora)}
@@ -167,9 +188,14 @@
   .showpanel .nums{display:flex;gap:20px;margin-top:18px;font-family:'Space Mono',monospace;font-size:.74rem;color:var(--ink-dim)}
   .showpanel .nums b{display:block;color:var(--ice);font-size:1.1rem;font-weight:400;font-family:'Fraunces',serif}
 
-  .plan-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
+  .plan-intro{max-width:560px;padding:28px 30px;margin-bottom:8px}
+  @media(max-width:760px){.plan-intro{padding:22px 22px}}
+  .plan-intro .eyebrow{margin-bottom:12px}
+  .plan-intro .lead{margin-top:16px}
+  .plan-intro .hint{margin-top:16px}
+  .plan-head{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
   .badge-rec{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#04060a;background:var(--aurora);padding:9px 15px;border-radius:100px;font-weight:700;box-shadow:0 0 24px rgba(121,236,174,.4)}
-  .hint{font-family:'Space Mono',monospace;font-size:.7rem;color:#9aa6b0;margin-top:20px;display:flex;align-items:center;gap:8px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+  .hint{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--ink-dim);margin-top:20px;display:flex;align-items:center;gap:8px}
   .hint::before{content:"☞";color:var(--aurora)}
   .timeline{margin-top:30px;position:relative;max-width:500px}
   .timeline::before{content:"";position:absolute;left:26px;top:10px;bottom:30px;width:2px;background:linear-gradient(var(--aurora),var(--ice) 55%,var(--amber));opacity:.35}
@@ -208,7 +234,7 @@
   .day:hover .open-day::after{transform:translateX(4px)}
   .leg{height:46vh;min-height:280px;display:flex;align-items:center;justify-content:center;position:relative}
   @media(max-width:760px){.leg{height:42vh;min-height:240px}}
-  .leg span{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8d99a3;background:rgba(5,8,11,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:9px 17px;border-radius:100px;border:1px solid var(--glass-line);text-shadow:0 1px 8px rgba(0,0,0,.85);display:inline-flex;align-items:center;gap:9px}
+  .leg span{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#dbe2e8;background:rgba(8,12,17,.42);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);padding:10px 18px;border-radius:100px;border:1px solid var(--glass-line);box-shadow:0 8px 28px rgba(0,0,0,.35);text-shadow:var(--text-sh);display:inline-flex;align-items:center;gap:9px}
   .leg span::before{content:"↓";color:var(--aurora)}
 
   .mapslide{position:relative;overflow:hidden}
@@ -334,12 +360,19 @@
 </head>
 <body>
 
-<div id="preloader" aria-hidden="true">
+<div id="preloader">
   <div class="pl-inner">
-    <div class="pl-ring"><span class="pl-fill"></span></div>
-    <div class="pl-co mono">61.6° N · 8.3° E</div>
+    <div class="pl-co mono">61.6° N · 8.3° E · Jotunheimen</div>
     <div class="pl-title disp">Noorwegen</div>
-    <div class="pl-sub mono">scherpstellen<span class="pl-dots"></span></div>
+    <div class="pl-sub mono">tien dagen · vier man · juli 2026</div>
+    <div class="slider" id="slider" role="button" tabindex="0" aria-label="Sleep of tik om de reis te starten">
+      <div class="slider-fill" id="sliderFill"></div>
+      <div class="slider-text" id="sliderText">sleep om op te stijgen</div>
+      <button class="slider-handle" id="sliderHandle" type="button" tabindex="-1" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5c1.2-1.2 2-3 1.5-3.5s-2.3.3-3.5 1.5L14 9 5.8 7.2c-.5-.1-.9.1-1.1.5l-.3.6c-.2.4-.1.9.3 1.2L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.2.3l.6-.3c.4-.2.6-.6.5-1.1z"/></svg>
+      </button>
+    </div>
+    <div class="pl-loading mono" id="plLoading">alles wordt geladen<span class="pl-dots"></span></div>
   </div>
 </div>
 
@@ -369,9 +402,9 @@
 <section class="slide" id="hero">
   <div class="hero__bg-fallback"></div>
   <div class="hero__inner">
-    <span class="kicker">Juli 2026 · vier vrienden · één zomer</span>
+    <span class="kicker">Juli 2026 · 10 dagen · 4 man</span>
     <h1>NOORWEGEN<br><em>in tien dagen</em></h1>
-    <p class="hero__sub">Drie nachten waarin de stad nooit helemaal donker wordt. Zeven dagen omhoog — tot waar de lucht dun wordt en het uitzicht je even stil maakt.</p>
+    <p class="hero__sub">Drie dagen stad, zeven dagen bergen. We beklimmen het hoogste punt van Noord-Europa en doen alsof dat heel normaal is.</p>
     <div class="hero__pills">
       <span class="pill"><b>3</b> dagen stad</span>
       <span class="pill"><b>7</b> dagen bergen</span>
@@ -423,15 +456,17 @@
 <!-- PLAN -->
 <section class="flow" id="plan">
   <div class="wrap" style="padding-top:clamp(64px,9vh,110px)">
-    <div class="plan-head">
-      <div>
-        <div class="reveal"><div class="eyebrow">02 — Het aanbevolen plan</div></div>
-        <div class="reveal d1"><h2 class="sec">Oslo → Jotunheimen → <em>Romsdalen</em></h2></div>
+    <div class="plan-intro glass reveal">
+      <div class="plan-head">
+        <div>
+          <div class="eyebrow">02 — Het aanbevolen plan</div>
+          <h2 class="sec">Oslo → Jotunheimen → <em>Romsdalen</em></h2>
+        </div>
+        <span class="badge-rec">● Aanbevolen</span>
       </div>
-      <div class="reveal d1"><span class="badge-rec">● Aanbevolen</span></div>
+      <p class="lead">Het minst gehaaste én voordeligste plan, volledig autovrij. <span style="color:var(--amber)">Amber = stadsnacht · </span><span style="color:var(--aurora)">groen = bergdag.</span></p>
+      <div class="hint">Tik op een dag voor de volledige dagpagina met opties, foto's en uitleg</div>
     </div>
-    <p class="lead reveal d1">Het minst gehaaste én voordeligste plan, volledig autovrij. <span style="color:var(--amber)">Amber = stadsnacht · </span><span style="color:var(--aurora)">groen = bergdag.</span></p>
-    <div class="hint reveal d1">Tik op een dag voor de volledige dagpagina met opties, foto's en uitleg</div>
 
     <div class="timeline">
       <!-- DAG 1 -->
@@ -723,8 +758,8 @@
 </section>
 
 <footer>
-  <span class="disp">Vier vrienden. Eén zomer.<br>Dit wordt 'm.</span>
-  <p class="foot-line">Tien dagen Noorwegen — drie nachten stad, zeven dagen bergen. Boek je vlucht, pak je rugzak, en we zien elkaar boven op de rug.</p>
+  <span class="disp">Tien dagen.<br>Nu nog even boeken.</span>
+  <p class="foot-line">Drie nachten stad, zeven dagen bergen. Vlucht boeken, rugzak pakken — en niet zeuren over de prijs van een biertje daar.</p>
   <p class="foot-meta mono">Juli 2026 · gemaakt voor ons · foto's via Google Places · satelliet via Esri &amp; NASA Blue Marble</p>
 </footer>
 
@@ -927,7 +962,6 @@
 /* ===== UI ===== */
 const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 window.__reducedMotion=RM;
-setTimeout(()=>{window.__introReady=true;},5000); // hard safety: intro never stays stuck
 const prog=document.getElementById('progress');
 const navLinks=document.getElementById('navLinks');
 document.getElementById('navToggle').addEventListener('click',()=>navLinks.classList.toggle('open'));
@@ -935,13 +969,44 @@ navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLink
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* ----- preloader: hold briefly, then reveal ----- */
+/* ----- start screen: slide (or tap) to begin; assets warm up behind it ----- */
 (function(){
   const pre=document.getElementById('preloader');if(!pre)return;
-  let gone=false;
-  function hide(){if(gone)return;gone=true;pre.classList.add('done');window.__introReady=true;setTimeout(()=>{pre.style.display='none';},1000);}
-  window.addEventListener('load',()=>setTimeout(hide,RM?150:700));
-  setTimeout(hide,4500); // safety net so it never gets stuck
+  const slider=document.getElementById('slider'),handle=document.getElementById('sliderHandle'),
+        fill=document.getElementById('sliderFill'),text=document.getElementById('sliderText'),
+        load=document.getElementById('plLoading');
+  let gone=false,dragging=false,moved=false,downCX=0,startX=0,x=0,maxX=0;
+  function dims(){maxX=Math.max(0,slider.clientWidth-handle.offsetWidth-10);}
+  function setX(v){x=Math.max(0,Math.min(v,maxX));handle.style.transform='translateX('+x+'px)';
+    fill.style.width=(x+handle.offsetWidth+6)+'px';
+    const p=maxX?x/maxX:0;if(text)text.style.opacity=Math.max(0,1-p*1.5).toFixed(2);}
+  function begin(){if(gone)return;gone=true;dims();
+    handle.style.transition='transform .4s var(--ease-out)';fill.style.transition='width .4s var(--ease-out)';
+    setX(maxX);slider.classList.add('done');window.__introReady=true;
+    pre.classList.add('done');setTimeout(()=>{pre.style.display='none';},1000);}
+  function snapBack(){handle.style.transition='transform .35s var(--ease-out)';fill.style.transition='width .35s var(--ease-out)';
+    setX(0);setTimeout(()=>{handle.style.transition='';fill.style.transition='';},370);}
+  function cx(e){return e.touches&&e.touches[0]?e.touches[0].clientX:e.clientX;}
+  function down(e){if(gone)return;dragging=true;moved=false;downCX=cx(e);dims();startX=downCX-x;
+    handle.style.transition='';fill.style.transition='';if(e.cancelable)e.preventDefault();}
+  function move(e){if(!dragging)return;const c=cx(e);if(Math.abs(c-downCX)>6)moved=true;setX(c-startX);
+    if(x>=maxX-2){dragging=false;begin();}if(e.cancelable)e.preventDefault();}
+  function up(){if(!dragging)return;dragging=false;if(x>=maxX*0.9||!moved)begin();else snapBack();}
+  try{
+    handle.addEventListener('mousedown',down);
+    handle.addEventListener('touchstart',down,{passive:false});
+    window.addEventListener('mousemove',move);
+    window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('mouseup',up);
+    window.addEventListener('touchend',up);
+    slider.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();begin();}});
+    window.addEventListener('resize',()=>{if(!gone){dims();setX(x);}});
+    dims();
+  }catch(err){pre.addEventListener('click',begin);}  // ultimate fallback
+  // reassure that everything is ready in the background
+  function ready(){if(load){load.innerHTML='klaar om te vertrekken';load.classList.add('ready');}}
+  if(document.readyState==='complete')ready();else window.addEventListener('load',ready);
+  setTimeout(ready,3500); // if load is slow we still invite the start
 })();
 
 /* ----- images: shimmer while loading, fade in, clean fallback on error ----- */
@@ -1097,7 +1162,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   }
   function updateOpacity(){
     if(!planSec)return;const pr=planSec.getBoundingClientRect();
-    const enter=Math.min(Math.max((1.15*H-pr.top)/(0.7*H),0),1);
+    const enter=Math.min(Math.max((1.3*H-pr.top)/(0.92*H),0),1);
     let fade=pr.bottom<H?Math.min(Math.max(pr.bottom/H,0),1):1; // fade out after the plan ends
     // hand over to the detailed satellite map during the plan; if no map, keep the globe tour (dimmed)
     let base=window.__hasFlyMap?(1-enter):(1-0.5*enter);
@@ -1183,10 +1248,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   try{
     map=L.map(el,{zoomControl:false,attributionControl:true,dragging:false,scrollWheelZoom:false,
       doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,tap:false,inertia:false,
-      fadeAnimation:true,zoomAnimation:true});
+      fadeAnimation:true,zoomAnimation:true,keepBuffer:4});
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       {maxZoom:18,minZoom:3,attribution:'Imagery &copy; Esri, Maxar, Earthstar Geographics'}).addTo(map);
-    map.setView([61.8,9.0],6);   // detailed map of southern/central Norway to start
+    // pre-warm the Oslo (first stop) tiles while the start screen is up, then settle on a closer overview
+    map.setView([59.95,10.75],11,{animate:false});
+    setTimeout(()=>{try{if(lastKey==='')map.setView([60.7,9.6],7,{animate:false});}catch(e){}},900);
   }catch(err){return;}
   window.__hasFlyMap=true;
 
@@ -1217,18 +1284,18 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
   function update(){
     raf=0;
     const pr=planSec.getBoundingClientRect();
-    const enter=Math.min(Math.max((1.15*innerHeight-pr.top)/(0.7*innerHeight),0),1);
+    const enter=Math.min(Math.max((1.3*innerHeight-pr.top)/(0.92*innerHeight),0),1);
     const fade=pr.bottom<innerHeight?Math.min(Math.max(pr.bottom/innerHeight,0),1):1;
     const op=enter*fade*0.92;
     el.style.opacity=op.toFixed(3);
     if(vign)vign.style.opacity=(op*0.95).toFixed(3);
     if(flyname)flyname.style.opacity=op>0.12?'1':'0';
     let key,w;
-    if(enter<0.12){key='NO';}else{const i=activeIdx();key='d'+i;w=WP[i];}
+    if(enter<0.1){key='NO';}else{const i=activeIdx();key='d'+i;w=WP[i];}
     if(key!==lastKey){
       lastKey=key;
       try{
-        if(key==='NO'){goTo(61.8,9.0,6,1.3);if(flyname)flyname.innerHTML='<b>NOORWEGEN</b> · satelliet';}
+        if(key==='NO'){goTo(60.7,9.6,7,1.3);if(flyname)flyname.innerHTML='<b>NOORWEGEN</b> · satelliet';}
         else{goTo(w[1],w[2],w[3],1.8);if(flyname)flyname.innerHTML='<b>'+w[0].toUpperCase()+'</b> · stadsniveau';}
       }catch(e){}
     }
