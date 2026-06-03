@@ -130,25 +130,26 @@
   .badge-rec{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#04060a;background:var(--aurora);padding:9px 15px;border-radius:100px;font-weight:700;box-shadow:0 0 24px rgba(121,236,174,.4)}
   .hint{font-family:'Space Mono',monospace;font-size:.7rem;color:#9aa6b0;margin-top:20px;display:flex;align-items:center;gap:8px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
   .hint::before{content:"☞";color:var(--aurora)}
-  .timeline{margin-top:30px;position:relative}
+  .timeline{margin-top:30px;position:relative;max-width:500px}
   .timeline::before{content:"";position:absolute;left:26px;top:10px;bottom:30px;width:2px;background:linear-gradient(var(--aurora),var(--ice) 55%,var(--amber));opacity:.35}
-  @media(max-width:760px){.timeline::before{left:20px}}
-  .day{position:relative;padding-left:74px;margin-bottom:22px;cursor:pointer}
-  @media(max-width:760px){.day{padding-left:54px}}
+  @media(max-width:760px){.timeline::before{left:20px}.timeline{max-width:none}}
+  .day{position:relative;padding-left:74px;margin-bottom:44px;cursor:pointer}
+  @media(max-width:760px){.day{padding-left:54px;margin-bottom:34px}}
   .day__num{position:absolute;left:0;top:6px;width:54px;height:54px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Mono',monospace;z-index:2;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:2px solid var(--aurora);box-shadow:0 0 20px rgba(121,236,174,.3)}
   @media(max-width:760px){.day__num{width:42px;height:42px}}
   .day__num small{font-size:.5rem;letter-spacing:.1em;color:var(--ink-dim);line-height:1}
   .day__num b{font-size:1.05rem;line-height:1.1}
   .day.night .day__num{border-color:var(--amber);box-shadow:0 0 20px rgba(255,189,122,.3)}
   .day.night .day__num b{color:var(--amber)}
-  .day__card{display:grid;grid-template-columns:290px 1fr;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
-  @media(max-width:760px){.day__card{grid-template-columns:1fr}}
+  .day__card{display:block;max-width:430px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
+  @media(max-width:760px){.day__card{max-width:none}}
   .day:hover .day__card{transform:translateY(-3px);box-shadow:0 18px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.22)}
-  .day__media{position:relative;min-height:200px;overflow:hidden}
+  .day__media{position:relative;height:128px;overflow:hidden}
+  @media(max-width:760px){.day__media{height:118px}}
   .day__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
   .day:hover .day__media img{transform:scale(1.05)}
   .day__media .geo{position:absolute;left:12px;bottom:11px;font-family:'Space Mono',monospace;font-size:.58rem;background:rgba(5,8,11,.6);backdrop-filter:blur(6px);padding:5px 10px;border-radius:100px;border:1px solid var(--glass-line)}
-  .day__body{padding:24px 26px;display:flex;flex-direction:column}
+  .day__body{padding:20px 22px;display:flex;flex-direction:column}
   .day__route{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.06em;color:var(--aurora);text-transform:uppercase;margin-bottom:8px}
   .day.night .day__route{color:var(--amber)}
   .day__body h3{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;line-height:1.05;margin-bottom:10px}
@@ -1031,6 +1032,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     if(prog)prog.style.width=(h.scrollTop/(max||1)*100)+'%';
     updateOpacity();
     paused=opacity<=0.02;
+    if(labelWrap&&opacity<=0.3)labelWrap.style.opacity='0';   // never let the globe label stick when faded
   },{passive:true});
   updateOpacity();
 
@@ -1073,7 +1075,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
     const pr=planSec.getBoundingClientRect();
     const enter=Math.min(Math.max((1.15*innerHeight-pr.top)/(0.7*innerHeight),0),1);
     const fade=pr.bottom<innerHeight?Math.min(Math.max(pr.bottom/innerHeight,0),1):1;
-    const op=enter*fade*0.7;
+    const op=enter*fade*0.9;
     el.style.opacity=op.toFixed(3);
     if(flyname)flyname.style.opacity=op>0.12?'1':'0';
     let key,w;
